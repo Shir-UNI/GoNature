@@ -26,9 +26,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // routes
-app.use('/api/users', userRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/groups', groupRoutes);
+// app.use('/api/users', userRoutes);
+// app.use('/api/posts', postRoutes);
+// app.use('/api/groups', groupRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
