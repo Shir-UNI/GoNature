@@ -40,7 +40,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/api/auth', authRoutes);
 app.use('/api/feed', feedRoutes);
 // app.use('/api/users', userRoutes);
-// app.use('/api/posts', postRoutes);
+app.use('/api/posts', postRoutes);
 // app.use('/api/groups', groupRoutes);
 
 // Start the server
