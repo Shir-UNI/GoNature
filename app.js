@@ -41,7 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/feed', feedRoutes);
 // app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
-// app.use('/api/groups', groupRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
