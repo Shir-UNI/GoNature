@@ -1,14 +1,12 @@
-// config/db.js
 const mongoose = require('mongoose');
-require('custom-env').env();
+require('custom-env').env(process.env.NODE_ENV, './config');
 
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ MongoDB Connected');
-  } catch (err) {
-    console.error('❌ DB Connection Error:', err);
-    process.exit(1);
+    console.log('✅ MongoDB connected');
+  } catch (error) {
+    console.error('❌ DB Connection Error:', error);
   }
 };
 
