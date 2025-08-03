@@ -36,7 +36,7 @@ const updatePost = async (req, res) => {
     const userId = req.session.userId;
     if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const updated = await postService.updatePost(req.params.id, req.body, userId);
+    const updated = await postService.updatePost(req.params.id, req.session.userId, req.body);
     if (!updated) return res.status(403).json({ message: 'You are not allowed to edit this post' });
 
     res.status(200).json(updated);
