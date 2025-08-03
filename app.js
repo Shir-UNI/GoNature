@@ -10,6 +10,7 @@ const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const authRoutes = require('./routes/authRoutes');
+const feedRoutes = require('./routes/feed');
 
 require('custom-env').env(process.env.NODE_ENV, './config');
 
@@ -37,6 +38,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 // routes
 app.use('/api/auth', authRoutes);
+app.use('/api/feed', feedRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/posts', postRoutes);
 // app.use('/api/groups', groupRoutes);
