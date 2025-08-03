@@ -8,6 +8,7 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 const groupRoutes = require('./routes/groupRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // routes
+app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/posts', postRoutes);
 // app.use('/api/groups', groupRoutes);
