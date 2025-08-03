@@ -12,7 +12,7 @@ const groupSchema = new mongoose.Schema({
     trim: true,
     default: ''
   },
-  createdBy: {
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
