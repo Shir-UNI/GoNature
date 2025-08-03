@@ -40,7 +40,9 @@ const loginUser = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ message: 'Invalid email or password' });
 
-    // Success
+    // Save user ID to session
+    req.session.userId = user._id;
+
     res.status(200).json({ message: 'Login successful', userId: user._id });
 
   } catch (err) {
