@@ -23,9 +23,12 @@ const getAllGroups = async () => {
   return await Group.find({}).populate('admin').populate('members');
 };
 
-const updateGroup = async (id, updateData) => {
+const updateGroup = async (id, updateData, adminId) => {
   const group = await Group.findById(id);
   if (!group) return null;
+  if (group.admin.toString() !== adminId) {
+    throw new Error('Unauthorized: Only the admin can update this group');
+  }
 
   if (updateData.name !== undefined) group.name = updateData.name.trim();
   if (updateData.description !== undefined) group.description = updateData.description.trim();
@@ -35,10 +38,10 @@ const updateGroup = async (id, updateData) => {
   return await group.save();
 };
 
-// Add a member to the group if not already added
-const addMemberToGroup = async (groupId, userId) => {
+const addMemberToGroup = async (groupId, userId, adminId) => {
   const group = await Group.findById(groupId);
   if (!group) return { error: 'Group not found' };
+  if (group.admin.toString() !== adminId) return { error: 'Unauthorized: Only the admin can add members' };
 
   const userExists = await User.exists({ _id: userId });
   if (!userExists) return { error: 'User does not exist' };
@@ -52,17 +55,20 @@ const addMemberToGroup = async (groupId, userId) => {
   return { group };
 };
 
-// Remove a member from the group if they exist
-const removeMemberFromGroup = async (groupId, userId) => {
+const removeMemberFromGroup = async (groupId, userId, adminId) => {
   const group = await Group.findById(groupId);
   if (!group) return null;
+  if (group.admin.toString() !== adminId) throw new Error('Unauthorized: Only the admin can remove members');
+
   group.members = group.members.filter(memberId => memberId.toString() !== userId);
   await group.save();
   return group;
 };
 
-// Delete a group by ID
-const deleteGroup = async (id) => {
+const deleteGroup = async (id, adminId) => {
+  const group = await Group.findById(id);
+  if (!group) return null;
+  if (group.admin.toString() !== adminId) throw new Error('Unauthorized: Only the admin can delete this group');
   return await Group.findByIdAndDelete(id);
 };
 
