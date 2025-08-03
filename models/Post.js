@@ -12,7 +12,9 @@ const postSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: true
+    required: true,
+    minlength: 1,
+    maxlength: 1000
   },
   media: {
     type: String
@@ -25,12 +27,16 @@ const postSchema = new mongoose.Schema({
   location: {
     type: {
       type: String,
-      enum: ['Point'],
-      required: false
+      enum: ['Point']
     },
     coordinates: {
       type: [Number], // [longitude, latitude]
-      required: false
+      validate: {
+        validator: function (val) {
+          return !this.location || (Array.isArray(val) && val.length === 2);
+        },
+        message: 'Coordinates must be an array of [longitude, latitude]'
+      }
     }
   }
 }, {

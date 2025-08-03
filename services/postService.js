@@ -1,0 +1,89 @@
+const Post = require('../models/Post');
+
+const createPost = async ({ user, content, media, type, group, location }) => {
+  if (!user || !content) {
+    throw new Error('User and content are required');
+  }
+
+  const post = new Post({
+    user,
+    content,
+    type,
+    group,
+    location
+  });
+
+  // Assign media only if provided
+  if (type === 'image' && media) post.imageUrl = media;
+  if (type === 'video' && media) post.videoUrl = media;
+
+  return await post.save();
+};
+
+const getPostById = async (id) => {
+  try {
+    return await Post.findById(id).populate('user').populate('group');
+  } catch (error) {
+    return null;
+  }
+};
+
+const getAllPosts = async () => {
+  return await Post.find({}).populate('user').populate('group').sort({ createdAt: -1 });
+};
+
+const updatePost = async (id, userId, updateData) => {
+  const post = await Post.findById(id);
+  if (!post) {
+    throw new Error('Post not found');
+  }
+
+  // Only the post creator can update it
+  if (post.user.toString() !== userId) {
+    throw new Error('Unauthorized: You can only update your own posts');
+  }
+
+  // Allow only certain fields to be updated
+  const allowedFields = ['content', 'type', 'media', 'location', 'group'];
+  for (const key of Object.keys(updateData)) {
+    if (allowedFields.includes(key)) {
+      post[key] = updateData[key];
+    }
+  }
+
+  // Handle media field depending on type
+  if (updateData.type === 'image') {
+    post.imageUrl = updateData.media;
+    post.videoUrl = undefined;
+  } else if (updateData.type === 'video') {
+    post.videoUrl = updateData.media;
+    post.imageUrl = undefined;
+  } else {
+    post.imageUrl = undefined;
+    post.videoUrl = undefined;
+  }
+
+  return await post.save();
+};
+
+const deletePost = async (id, userId) => {
+  const post = await Post.findById(id);
+  if (!post) {
+    throw new Error('Post not found');
+  }
+
+  // Only the post creator can delete it
+  if (post.user.toString() !== userId) {
+    throw new Error('Unauthorized: You can only delete your own posts');
+  }
+
+  return await Post.findByIdAndDelete(id);
+};
+
+module.exports = {
+  createPost,
+  getPostById,
+  getAllPosts,
+  updatePost,
+  deletePost
+};

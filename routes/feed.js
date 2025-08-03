@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const requireLogin = require('../middleware/authMiddleware');
+const { isAuthenticated } = require('../middleware/authMiddleware');
 
-router.get('/', requireLogin, (req, res) => {
+router.get('/', isAuthenticated, (req, res) => {
   res.status(200).json({
     message: `Welcome to your feed, user ${req.session.userId}`
   });
