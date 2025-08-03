@@ -21,9 +21,9 @@ router.put('/:id', isAuthenticated, validateUpdateGroup, groupController.updateG
 router.delete('/:id', isAuthenticated, groupController.deleteGroup);
 
 // Add a member to group
-router.post('/:id/members', isAuthenticated, groupController.addMemberToGroup);
+router.post('/:id/members', isAuthenticated, groupController.addMember);
 
 // Remove a member from group
-router.delete('/:id/members/:userId', isAuthenticated, groupController.removeMemberFromGroup);
+router.delete('/:id/members/:userId', isAuthenticated, groupController.removeMember);
 
 module.exports = router;
