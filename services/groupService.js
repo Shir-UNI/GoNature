@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Group = require('../models/Group');
 const User = require('../models/User');
 
@@ -38,31 +40,72 @@ const updateGroup = async (id, updateData, adminId) => {
   return await group.save();
 };
 
-const addMemberToGroup = async (groupId, userId, adminId) => {
+const addMemberToGroup = async (groupId, userIdToAdd, currentUserId) => {
   const group = await Group.findById(groupId);
   if (!group) return { error: 'Group not found' };
-  if (group.admin.toString() !== adminId) return { error: 'Unauthorized: Only the admin can add members' };
 
-  const userExists = await User.exists({ _id: userId });
-  if (!userExists) return { error: 'User does not exist' };
+  const isAdmin = group.admin.toString() === currentUserId;
+  const isAddingSelf = userIdToAdd === currentUserId;
 
-  if (group.members.includes(userId)) {
+  // Authorization check
+  if (!isAdmin && !isAddingSelf) {
+    return { error: 'Unauthorized: You can only add yourself to a group' };
+  }
+
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userIdToAdd)) {
+    return { error: 'Invalid user ID format' };
+  }
+
+  const userExists = await User.exists({ _id: userIdToAdd });
+  if (!userExists) {
+    return { error: 'User does not exist' };
+  }
+
+  if (group.members.includes(userIdToAdd)) {
     return { error: 'User is already a member of this group' };
   }
 
-  group.members.push(userId);
+  group.members.push(userIdToAdd);
   await group.save();
   return { group };
 };
 
-const removeMemberFromGroup = async (groupId, userId, adminId) => {
-  const group = await Group.findById(groupId);
-  if (!group) return null;
-  if (group.admin.toString() !== adminId) throw new Error('Unauthorized: Only the admin can remove members');
+const removeMemberFromGroup = async (groupId, userIdToRemove, currentUserId) => {
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(userIdToRemove)) {
+    return { error: 'Invalid user ID format' };
+  }
 
-  group.members = group.members.filter(memberId => memberId.toString() !== userId);
+  const group = await Group.findById(groupId);
+  if (!group) return { error: 'Group not found' };
+
+  const isAdmin = group.admin.toString() === currentUserId;
+  const isRemovingSelf = userIdToRemove === currentUserId;
+
+  // Authorization check
+  if (!isAdmin && !isRemovingSelf) {
+    return { error: 'Unauthorized: You can only remove yourself from the group' };
+  }
+
+  // Prevent removing the admin
+  if (group.admin.toString() === userIdToRemove) {
+    return { error: 'Cannot remove the admin from the group' };
+  }
+
+  const userExists = await User.exists({ _id: userIdToRemove });
+  if (!userExists) {
+    return { error: 'User does not exist' };
+  }
+
+  const isMember = group.members.some(memberId => memberId.toString() === userIdToRemove);
+  if (!isMember) {
+    return { error: 'User is not a member of this group' };
+  }
+
+  group.members = group.members.filter(memberId => memberId.toString() !== userIdToRemove);
   await group.save();
-  return group;
+  return { group };
 };
 
 const deleteGroup = async (id, adminId) => {
