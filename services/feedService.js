@@ -11,7 +11,7 @@ const getUserFeed = async (userId) => {
   // Find posts from those groups, sorted by date descending
   const posts = await Post.find({ group: { $in: groupIds } })
     .sort({ createdAt: -1 })
-    .populate('author', 'username profileImage')
+    .populate('user', 'profileImage')
     .populate('group', 'name')
     .lean();
 
