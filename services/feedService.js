@@ -1,21 +1,23 @@
 const Group = require('../models/Group');
 const Post = require('../models/Post');
-const User = require('../models/User');
 
-const getFeedForUser = async (userId) => {
-  // Get all groups the user is a member of
-  const userGroups = await Group.find({ members: userId }).select('_id');
+const getUserFeed = async (userId) => {
+  // Find all groups the user is a member of
+  const userGroups = await Group.find({ members: userId });
+
+  // Extract the group IDs
   const groupIds = userGroups.map(group => group._id);
 
-  // Get all posts from those groups, newest first
+  // Find posts from those groups, sorted by date descending
   const posts = await Post.find({ group: { $in: groupIds } })
-    .populate('user', 'username profileImage') // populate user data
-    .populate('group', 'name') // populate group name
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .populate('author', 'username profileImage')
+    .populate('group', 'name')
+    .lean();
 
   return posts;
 };
 
 module.exports = {
-  getFeedForUser
+  getUserFeed
 };
