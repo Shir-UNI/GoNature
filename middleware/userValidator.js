@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const validateRegistration = (req, res, next) => {
   const { username, email, password, profileImage } = req.body;
 
@@ -48,7 +47,7 @@ const validateLogin = (req, res, next) => {
     return res.status(400).json({ message: 'Password is required and must be a string' });
   }
 
-  next();
+  next(); 
 };
 
 const validateUpdateUser = (req, res, next) => {
