@@ -1,3 +1,6 @@
+const mongoose = require('mongoose');
+
+
 const validateRegistration = (req, res, next) => {
   const { username, email, password, profileImage } = req.body;
 
