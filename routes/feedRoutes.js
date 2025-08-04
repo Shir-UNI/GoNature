@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middleware/authMiddleware');
+const feedController = require('../controllers/feedController');
 
-router.get('/', isAuthenticated, (req, res) => {
-  res.status(200).json({
-    message: `Welcome to your feed, user ${req.session.userId}`
-  });
-});
+// Get feed for logged-in user
+router.get('/', isAuthenticated, feedController.getFeed);
 
 module.exports = router;
