@@ -20,4 +20,7 @@ router.put('/:id', isAuthenticated, validateUserIdParam, validateUpdateUser, use
 // Delete user (only by themselves)
 router.delete('/:id', isAuthenticated, validateUserIdParam, userController.deleteUser);
 
+// Get current user
+router.get('/me', isAuthenticated, userController.getCurrentUser);
+
 module.exports = router;
