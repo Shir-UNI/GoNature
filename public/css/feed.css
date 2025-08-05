@@ -48,3 +48,21 @@ body {
 #posts-container {
   margin-top: 20px;
 }
+
+.clear-date-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  color: #888;
+  cursor: pointer;
+}
+
+.clear-date-btn:hover {
+  color: #000;
+}
