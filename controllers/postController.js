@@ -1,14 +1,29 @@
 const postService = require('../services/postService');
+const mongoose = require('mongoose');
 
 const createPost = async (req, res) => {
   try {
     const userId = req.session.userId;
-    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const post = await postService.createPost({ ...req.body, user: userId });
+    const post = await postService.createPost({
+      ...req.body,
+      user: userId
+    });
+
     res.status(201).json(post);
+
   } catch (error) {
-    res.status(500).json({ message: 'Failed to create post', error: error.message });
+    // Handle invalid ObjectId (e.g., malformed group ID)
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(400).json({ message: 'Invalid group ID' });
+    }
+
+    // Handle known service-level errors
+    const status = error.status || 500;
+    const message = error.message || 'Failed to create post';
+
+    console.error('Create post error:', message);
+    res.status(status).json({ message });
   }
 };
 

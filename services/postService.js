@@ -1,50 +1,72 @@
-const Post = require('../models/Post');
+const Post = require("../models/Post");
+const Group = require("../models/Group");
 
 const createPost = async ({ user, content, media, type, group, location }) => {
-  if (!user || !content) {
-    throw new Error('User and content are required');
+  if (!user || !content || !group) {
+    throw new Error("User, content, and group are required");
   }
 
+  // Check if the group exists
+  const groupDoc = await Group.findById(group);
+  if (!groupDoc) {
+    const err = new Error("Group not found");
+    err.status = 404;
+    throw err;
+  }
+ 
+  // Check if the user is a member of the group
+  const isMember = groupDoc.members.some(
+    (memberId) => memberId.toString() === user.toString()
+  );
+  if (!isMember) {
+    const err = new Error("User is not a member of the group");
+    err.status = 403;
+    throw err;
+  }
+
+  // Create post
   const post = new Post({
     user,
     content,
     type,
     group,
-    location
+    location,
   });
 
-  // Assign media only if provided
-  if (type === 'image' && media) post.imageUrl = media;
-  if (type === 'video' && media) post.videoUrl = media;
+  if (type === "image" && media) post.imageUrl = media;
+  if (type === "video" && media) post.videoUrl = media;
 
   return await post.save();
 };
 
 const getPostById = async (id) => {
   try {
-    return await Post.findById(id).populate('user').populate('group');
+    return await Post.findById(id).populate("user").populate("group");
   } catch (error) {
     return null;
   }
 };
 
 const getAllPosts = async () => {
-  return await Post.find({}).populate('user').populate('group').sort({ createdAt: -1 });
+  return await Post.find({})
+    .populate("user")
+    .populate("group")
+    .sort({ createdAt: -1 });
 };
 
 const updatePost = async (id, userId, updateData) => {
   const post = await Post.findById(id);
   if (!post) {
-    throw new Error('Post not found');
+    throw new Error("Post not found");
   }
 
   // Only the post creator can update it
   if (post.user.toString() !== userId) {
-    throw new Error('Unauthorized: You can only update your own posts');
+    throw new Error("Unauthorized: You can only update your own posts");
   }
 
   // Allow only certain fields to be updated
-  const allowedFields = ['content', 'type', 'media', 'location', 'group'];
+  const allowedFields = ["content", "type", "media", "location", "group"];
   for (const key of Object.keys(updateData)) {
     if (allowedFields.includes(key)) {
       post[key] = updateData[key];
@@ -52,10 +74,10 @@ const updatePost = async (id, userId, updateData) => {
   }
 
   // Handle media field depending on type
-  if (updateData.type === 'image') {
+  if (updateData.type === "image") {
     post.imageUrl = updateData.media;
     post.videoUrl = undefined;
-  } else if (updateData.type === 'video') {
+  } else if (updateData.type === "video") {
     post.videoUrl = updateData.media;
     post.imageUrl = undefined;
   } else {
@@ -69,12 +91,12 @@ const updatePost = async (id, userId, updateData) => {
 const deletePost = async (id, userId) => {
   const post = await Post.findById(id);
   if (!post) {
-    throw new Error('Post not found');
+    throw new Error("Post not found");
   }
 
   // Only the post creator can delete it
   if (post.user.toString() !== userId) {
-    throw new Error('Unauthorized: You can only delete your own posts');
+    throw new Error("Unauthorized: You can only delete your own posts");
   }
 
   return await Post.findByIdAndDelete(id);
@@ -85,5 +107,5 @@ module.exports = {
   getPostById,
   getAllPosts,
   updatePost,
-  deletePost
+  deletePost,
 };
