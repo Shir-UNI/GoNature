@@ -28,4 +28,8 @@ router.post('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'),
 // Remove a member from group
 router.delete('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'), groupController.removeMember);
 
+// Gets group by UserID
+router.get('/my-groups', isAuthenticated, groupController.getGroupsByCurrentUser);
+
+
 module.exports = router;

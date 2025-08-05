@@ -1,43 +1,43 @@
 // Google Maps setup
-  window.initMap = function () {
-    const map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 32.0853, lng: 34.7818 }, // Tel Aviv as default
-      zoom: 8,
-    });
+window.initMap = function () {
+  const map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 32.0853, lng: 34.7818 }, // Tel Aviv as default
+    zoom: 8,
+  });
 
-    const input = document.getElementById("locationSearch");
-    const autocomplete = new google.maps.places.Autocomplete(input);
-    autocomplete.bindTo("bounds", map);
+  const input = document.getElementById("locationSearch");
+  const autocomplete = new google.maps.places.Autocomplete(input);
+  autocomplete.bindTo("bounds", map);
 
-    const marker = new google.maps.Marker({
-      map,
-      anchorPoint: new google.maps.Point(0, -29),
-    });
+  const marker = new google.maps.Marker({
+    map,
+    anchorPoint: new google.maps.Point(0, -29),
+  });
 
-    autocomplete.addListener("place_changed", () => {
-      marker.setVisible(false);
-      const place = autocomplete.getPlace();
+  autocomplete.addListener("place_changed", () => {
+    marker.setVisible(false);
+    const place = autocomplete.getPlace();
 
-      if (!place.geometry || !place.geometry.location) {
-        alert("No details available for input: '" + place.name + "'");
-        return;
-      }
+    if (!place.geometry || !place.geometry.location) {
+      alert("No details available for input: '" + place.name + "'");
+      return;
+    }
 
-      // Center the map on the selected place
-      map.setCenter(place.geometry.location);
-      map.setZoom(14);
+    // Center the map on the selected place
+    map.setCenter(place.geometry.location);
+    map.setZoom(14);
 
-      // Update marker position
-      marker.setPosition(place.geometry.location);
-      marker.setVisible(true);
+    // Update marker position
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
 
-      // Save coordinates to hidden inputs
-      document.getElementById("locationLat").value =
-        place.geometry.location.lat();
-      document.getElementById("locationLng").value =
-        place.geometry.location.lng();
-    });
-  };
+    // Save coordinates to hidden inputs
+    document.getElementById("locationLat").value =
+      place.geometry.location.lat();
+    document.getElementById("locationLng").value =
+      place.geometry.location.lng();
+  });
+};
 
 document.addEventListener("DOMContentLoaded", async () => {
   const postsContainer = document.getElementById("posts-container");
@@ -54,6 +54,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("usernameDisplay").textContent = user.username;
     document.getElementById("userProfileImage").src = user.profileImage;
   };
+
+  // Load groups the user belongs to
+const loadUserGroups = async () => {
+  const res = await fetch("/api/groups/mine", {
+    credentials: "include",
+  });
+  if (!res.ok) {
+    console.error("Failed to load groups");
+    return;
+  }
+
+  const groups = await res.json();
+  const groupSelect = document.getElementById("postGroup");
+
+ groups.forEach((group) => {
+    const option = document.createElement("option");
+    option.value = group._id;
+    option.textContent = group.name;
+    groupSelect.appendChild(option);
+  });
+};
 
   // Load posts
   const loadPosts = async () => {
@@ -109,13 +130,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     const content = document.getElementById("newPostContent").value.trim();
     const mediaFile = document.getElementById("newPostMedia").files[0];
+    const groupId = document.getElementById("postGroup").value;
     const lat = document.getElementById("locationLat").value;
     const lng = document.getElementById("locationLng").value;
 
     if (!content && !mediaFile) return;
 
+    if (!groupId) {
+      alert("Please select a group");
+      return;
+    }
+   
     const formData = new FormData();
     formData.append("content", content);
+    formData.append("group", groupId);
     if (mediaFile) formData.append("media", mediaFile);
     if (lat && lng) {
       formData.append("locationLat", lat);
@@ -180,8 +208,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  
-
   document
     .getElementById("postSubmitBtn")
     ?.addEventListener("click", handlePostSubmit);
@@ -191,6 +217,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     await loadUser();
+    await loadUserGroups();
     await loadPosts();
   } catch (err) {
     console.error("Error loading feed:", err.message);
@@ -198,3 +225,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       '<div class="alert alert-danger">Error loading feed.</div>';
   }
 });
+

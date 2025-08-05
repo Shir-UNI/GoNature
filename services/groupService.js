@@ -178,6 +178,10 @@ const deleteGroup = async (id, adminId) => {
   return await Group.findByIdAndDelete(id);
 };
 
+const getGroupsByUserId = async (userId) => {
+  return await Group.find({ members: userId }); // assuming "members" is an array of user IDs
+};
+
 module.exports = {
   createGroup,
   getGroupById,
@@ -185,5 +189,6 @@ module.exports = {
   updateGroup,
   addMemberToGroup,
   removeMemberFromGroup,
-  deleteGroup
+  deleteGroup,
+  getGroupsByUserId
 };

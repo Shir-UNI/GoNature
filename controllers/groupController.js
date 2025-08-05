@@ -120,6 +120,15 @@ const removeMember = async (req, res) => {
   }
 };
 
+const getGroupsByCurrentUser = async (req, res) => {
+  try {
+    const groups = await groupService.getGroupsByUserId(req.session.userId);
+    res.status(200).json(groups);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createGroup,
   getGroupById,
@@ -128,4 +137,5 @@ module.exports = {
   deleteGroup,
   addMember,
   removeMember,
+  getGroupsByCurrentUser,
 };

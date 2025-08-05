@@ -38,6 +38,16 @@
         <h5 class="card-title">Create New Post</h5>
         <form id="newPostForm" enctype="multipart/form-data">
 
+          <!-- Group Selector -->
+          <div class="mb-3">
+            <label for="postGroup" class="form-label fw-bold">Choose a Group:</label>
+            <select id="postGroup" name="groupId" class="form-select" required>
+              <option value="">-- Select a group --</option>
+              <!-- Options will be dynamically injected -->
+            </select>
+          </div>
+
+
           <!-- Post content -->
           <div class="mb-3">
             <textarea class="form-control" id="newPostContent" rows="3" placeholder="What's on your mind?"></textarea>
@@ -86,6 +96,7 @@
   <!-- Google Maps API -->
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&libraries=places&callback=initMap">
-  </script>
+    </script>
 </body>
+
 </html>

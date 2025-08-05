@@ -28,5 +28,4 @@ router.get('/feed', isAuthenticated, (req, res) => {
   });
 });
   
-
 module.exports = router;
