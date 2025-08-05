@@ -33,7 +33,7 @@ const deleteUser = async (id, currentUserId) => {
     throw new Error('Unauthorized: You can only delete your own account');
   }
 
-  return await User.findByIdAndDelete(id);
+  return await User.findByIdAndUpdate(id, { isDeleted: true });
 };
 
 module.exports = {
