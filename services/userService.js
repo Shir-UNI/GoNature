@@ -73,16 +73,10 @@ const deleteUser = async (id, currentUserId) => {
   return await User.findByIdAndUpdate(id, { isDeleted: true });
 };
 
-const getUserById = async (userId) => {
-  const user = await User.findById(userId).select('username email profileImage');
-  return user;
-};
 
 module.exports = {
   getUserById,
   getAllUsers,
   updateUser,
   deleteUser,
-  getUserById,
-
 };

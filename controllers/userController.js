@@ -54,12 +54,18 @@ const deleteUser = async (req, res) => {
 
 // Get currently logged-in user
 const getCurrentUser = async (req, res) => {
+  console.log('Session userId:', req.session.userId); // test
+  
   try {
     const userId = req.session.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized: Please log in' });
+    }
+
     const user = await userService.getUserById(userId);
     res.status(200).json(user);
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    res.status(err.status || 400).json({ message: 'Failed to get user', error: err.message });
   }
 };
 
