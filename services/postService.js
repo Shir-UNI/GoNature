@@ -1,5 +1,5 @@
 const Post = require("../models/Post");
-const Group = require("../models/group");
+const Group = require("../models/Group");
 
 const createPost = async ({ user, content, media, type, group, location }) => {
   if (!user || !content || !group) {
