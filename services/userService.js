@@ -73,7 +73,6 @@ const deleteUser = async (id, currentUserId) => {
   return await User.findByIdAndUpdate(id, { isDeleted: true });
 };
 
-
 module.exports = {
   getUserById,
   getAllUsers,

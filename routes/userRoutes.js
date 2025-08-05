@@ -8,6 +8,9 @@ const {
 } = require('../middleware/userValidator');
 const { isAuthenticated } = require('../middleware/authMiddleware');
 
+// Get current user
+router.get('/me', isAuthenticated, userController.getCurrentUser);
+
 // Get all users
 router.get('/', isAuthenticated, userController.getAllUsers);
 
@@ -20,7 +23,5 @@ router.put('/:id', isAuthenticated, validateUserIdParam, validateUpdateUser, use
 // Delete user (only by themselves)
 router.delete('/:id', isAuthenticated, validateUserIdParam, userController.deleteUser);
 
-// Get current user
-router.get('/me', isAuthenticated, userController.getCurrentUser);
 
 module.exports = router;

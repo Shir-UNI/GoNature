@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    // Get current user info
-    const userRes = await fetch('/api/users/me');
+    // Get current user info (send session cookie!)
+    const userRes = await fetch('/api/users/me', {
+      method: 'GET',
+      credentials: 'include' 
+    });
+
     if (!userRes.ok) throw new Error('Failed to fetch user data');
     const user = await userRes.json();
 
@@ -12,8 +16,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (usernameElement) usernameElement.textContent = user.username;
     if (profileImageElement) profileImageElement.src = user.profileImage;
 
-    // Load feed posts
-    const postsRes = await fetch('/api/feed');
+    // Load feed posts (send session cookie!)
+    const postsRes = await fetch('/api/feed', {
+      method: 'GET',
+      credentials: 'include' 
+    });
+
     if (!postsRes.ok) throw new Error('Failed to fetch posts');
     const posts = await postsRes.json();
 
@@ -21,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     feedContainer.innerHTML = '';
 
     if (posts.length === 0) {
-      feedContainer.innerHTML = '<p class="text-center mt-4">No posts to display yet.</p>';
+      feedContainer.innerHTML = '<p class="text-center mt-4">No posts to display yet...</p>';
     } else {
       posts.forEach(post => {
         const postElement = document.createElement('div');

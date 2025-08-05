@@ -9,7 +9,7 @@ const isAuthenticated = (req, res, next) => {
   }
 
   // If the request is AJAX / API
-  return res.status(401).json({ message: 'Unauthorized: Please log in' });
+  return res.status(401).json({ message: 'Unauthorized: Please log in' }); 
 };
 
 const checkUserNotDeleted = async (req, res, next) => {
