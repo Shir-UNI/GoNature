@@ -21,7 +21,7 @@ const registerUser = async ({ username, email, password, profileImage }) => {
 };
 
 const loginUser = async ({ email, password }) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, isDeleted: false });
   if (!user) throw new Error('Invalid email or password');
 
   const match = await bcrypt.compare(password, user.password);
