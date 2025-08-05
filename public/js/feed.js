@@ -1,83 +1,34 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const feedContainer = document.getElementById("feedContainer");
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Fetch user data
+    const userRes = await fetch('/api/users/me');
+    const userData = await userRes.json();
+    document.getElementById('username').textContent = userData.username;
+    document.getElementById('profileImage').src = userData.profileImage;
 
-  const fetchFeed = async () => {
-    try {
-      const response = await fetch("/api/feed");
-      const posts = await response.json();
+    // Fetch feed posts
+    const res = await fetch('/api/feed');
+    const posts = await res.json();
 
-      if (!Array.isArray(posts)) {
-        throw new Error("Unexpected response format");
-      }
+    const container = document.getElementById('feedContainer');
+    container.innerHTML = '';
 
-      // Clear existing content
-      feedContainer.innerHTML = "";
-
-      posts.forEach(post => {
-        const postElement = createPostCard(post);
-        feedContainer.appendChild(postElement);
-      });
-
-    } catch (err) {
-      console.error("Failed to load feed:", err);
-      feedContainer.innerHTML = `<div class="alert alert-danger">Failed to load feed</div>`;
-    }
-  };
-
-  const createPostCard = (post) => {
-    const col = document.createElement("div");
-    col.className = "col-md-6 col-lg-4";
-
-    const card = document.createElement("div");
-    card.className = "card h-100 shadow-sm";
-
-    // User & group info
-    const header = document.createElement("div");
-    header.className = "card-header d-flex align-items-center gap-2";
-    header.innerHTML = `
-      <img src="${post.user.profileImage}" alt="User" class="rounded-circle" width="40" height="40">
-      <div>
-        <strong>${post.user.username}</strong><br/>
-        <small class="text-muted">${post.group.name}</small>
-      </div>
-    `;
-
-    // Post content
-    const body = document.createElement("div");
-    body.className = "card-body";
-
-    const content = document.createElement("p");
-    content.textContent = post.content;
-    body.appendChild(content);
-
-    // Media (if exists)
-    if (post.type === "image" && post.imageUrl) {
-      const img = document.createElement("img");
-      img.src = post.imageUrl;
-      img.className = "img-fluid rounded";
-      body.appendChild(img);
-    } else if (post.type === "video" && post.videoUrl) {
-      const video = document.createElement("video");
-      video.src = post.videoUrl;
-      video.controls = true;
-      video.className = "w-100 rounded";
-      body.appendChild(video);
-    }
-
-    // Footer with time
-    const footer = document.createElement("div");
-    footer.className = "card-footer text-muted small";
-    const date = new Date(post.createdAt);
-    footer.textContent = `Posted on ${date.toLocaleString()}`;
-
-    // Assemble card
-    card.appendChild(header);
-    card.appendChild(body);
-    card.appendChild(footer);
-    col.appendChild(card);
-
-    return col;
-  };
-
-  fetchFeed(); // Initial load
+    posts.forEach(post => {
+      const card = document.createElement('div');
+      card.className = 'col-md-6';
+      card.innerHTML = `
+        <div class="card p-3">
+          <div class="d-flex align-items-center mb-2">
+            <img src="${post.user.profileImage}" class="rounded-circle me-2" width="40" height="40" />
+            <strong>${post.user.username}</strong>
+            <span class="text-muted ms-auto small">${new Date(post.createdAt).toLocaleString()}</span>
+          </div>
+          <p>${post.content}</p>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Error loading feed:', err);
+  }
 });
