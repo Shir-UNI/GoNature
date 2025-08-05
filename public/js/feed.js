@@ -1,61 +1,200 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // Get current user info (send session cookie!)
-    const userRes = await fetch('/api/users/me', {
-      method: 'GET',
-      credentials: 'include' 
+// Google Maps setup
+  window.initMap = function () {
+    const map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 32.0853, lng: 34.7818 }, // Tel Aviv as default
+      zoom: 8,
     });
 
-    if (!userRes.ok) throw new Error('Failed to fetch user data');
-    const user = await userRes.json();
+    const input = document.getElementById("locationSearch");
+    const autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo("bounds", map);
 
-    // Update navbar with user info
-    const usernameElement = document.getElementById('navbar-username');
-    const profileImageElement = document.getElementById('navbar-profile-img');
-
-    if (usernameElement) usernameElement.textContent = user.username;
-    if (profileImageElement) profileImageElement.src = user.profileImage;
-
-    // Load feed posts (send session cookie!)
-    const postsRes = await fetch('/api/feed', {
-      method: 'GET',
-      credentials: 'include' 
+    const marker = new google.maps.Marker({
+      map,
+      anchorPoint: new google.maps.Point(0, -29),
     });
 
-    if (!postsRes.ok) throw new Error('Failed to fetch posts');
-    const posts = await postsRes.json();
+    autocomplete.addListener("place_changed", () => {
+      marker.setVisible(false);
+      const place = autocomplete.getPlace();
 
-    const feedContainer = document.getElementById('feed-container');
-    feedContainer.innerHTML = '';
+      if (!place.geometry || !place.geometry.location) {
+        alert("No details available for input: '" + place.name + "'");
+        return;
+      }
 
+      // Center the map on the selected place
+      map.setCenter(place.geometry.location);
+      map.setZoom(14);
+
+      // Update marker position
+      marker.setPosition(place.geometry.location);
+      marker.setVisible(true);
+
+      // Save coordinates to hidden inputs
+      document.getElementById("locationLat").value =
+        place.geometry.location.lat();
+      document.getElementById("locationLng").value =
+        place.geometry.location.lng();
+    });
+  };
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const postsContainer = document.getElementById("posts-container");
+  let allPosts = [];
+
+  // Load user info
+  const loadUser = async () => {
+    const res = await fetch("/api/users/me", {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch user");
+    const user = await res.json();
+
+    document.getElementById("usernameDisplay").textContent = user.username;
+    document.getElementById("userProfileImage").src = user.profileImage;
+  };
+
+  // Load posts
+  const loadPosts = async () => {
+    const res = await fetch("/api/feed", {
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Failed to fetch posts");
+    allPosts = await res.json();
+    displayPosts(allPosts);
+  };
+
+  // Display posts
+  const displayPosts = (posts) => {
+    postsContainer.innerHTML = "";
     if (posts.length === 0) {
-      feedContainer.innerHTML = '<p class="text-center mt-4">No posts to display yet...</p>';
-    } else {
-      posts.forEach(post => {
-        const postElement = document.createElement('div');
-        postElement.classList.add('card', 'mb-3');
+      postsContainer.innerHTML =
+        '<p class="text-center">No posts to display.</p>';
+      return;
+    }
 
-        postElement.innerHTML = `
-          <div class="card-body">
-            <div class="d-flex align-items-center mb-2">
-              <img src="${post.user.profileImage}" class="rounded-circle me-2" width="40" height="40" alt="${post.user.username}'s profile">
-              <strong>${post.user.username}</strong> in <em>${post.group.name}</em>
+    posts.forEach((post) => {
+      const card = document.createElement("div");
+      card.className = "card mb-3 shadow-sm";
+      card.innerHTML = `
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <img src="${
+              post.user.profileImage
+            }" class="rounded-circle me-2" width="40" height="40" alt="${
+        post.user.username
+      }'s profile">
+            <div>
+              <strong>${post.user.username}</strong> <br/>
+              <small class="text-muted">in ${post.group.name} • ${new Date(
+        post.createdAt
+      ).toLocaleString()}</small>
             </div>
-            <p>${post.content}</p>
-            ${post.media ? `<img src="${post.media}" class="img-fluid mt-2" alt="Post media">` : ''}
-            <p class="text-muted mt-2 small">${new Date(post.createdAt).toLocaleString()}</p>
           </div>
-        `;
+          <p>${post.content}</p>
+          ${
+            post.media
+              ? `<img src="${post.media}" class="img-fluid mt-2 rounded" alt="Post media">`
+              : ""
+          }
+        </div>
+      `;
+      postsContainer.appendChild(card);
+    });
+  };
 
-        feedContainer.appendChild(postElement);
-      });
+  // Submit new post
+  const handlePostSubmit = async (e) => {
+    e.preventDefault();
+    const content = document.getElementById("newPostContent").value.trim();
+    const mediaFile = document.getElementById("newPostMedia").files[0];
+    const lat = document.getElementById("locationLat").value;
+    const lng = document.getElementById("locationLng").value;
+
+    if (!content && !mediaFile) return;
+
+    const formData = new FormData();
+    formData.append("content", content);
+    if (mediaFile) formData.append("media", mediaFile);
+    if (lat && lng) {
+      formData.append("locationLat", lat);
+      formData.append("locationLng", lng);
     }
 
+    const res = await fetch("/api/posts", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      alert("Failed to post");
+      return;
+    }
+
+    document.getElementById("newPostForm").reset();
+    document.getElementById("mediaFileName").textContent = "No file selected";
+    document.getElementById("mediaPreview").style.display = "none";
+    await loadPosts();
+  };
+
+  // Filter posts
+  const handleSearch = () => {
+    const query = document
+      .getElementById("postSearchInput")
+      .value.toLowerCase();
+    const filtered = allPosts.filter(
+      (p) =>
+        p.content.toLowerCase().includes(query) ||
+        p.user.username.toLowerCase().includes(query) ||
+        p.group.name.toLowerCase().includes(query)
+    );
+    displayPosts(filtered);
+  };
+
+  // Image preview
+  const mediaInput = document.getElementById("newPostMedia");
+  const uploadBtn = document.getElementById("mediaUploadBtn");
+  const fileNameSpan = document.getElementById("mediaFileName");
+  const previewContainer = document.getElementById("mediaPreview");
+  const previewImage = document.getElementById("previewImage");
+
+  uploadBtn?.addEventListener("click", () => mediaInput.click());
+
+  mediaInput?.addEventListener("change", () => {
+    const file = mediaInput.files[0];
+
+    if (file) {
+      fileNameSpan.textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+        previewContainer.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      fileNameSpan.textContent = "No file selected";
+      previewContainer.style.display = "none";
+    }
+  });
+
+  
+
+  document
+    .getElementById("postSubmitBtn")
+    ?.addEventListener("click", handlePostSubmit);
+  document
+    .getElementById("postSearchInput")
+    ?.addEventListener("input", handleSearch);
+
+  try {
+    await loadUser();
+    await loadPosts();
   } catch (err) {
-    console.error('Error loading feed:', err.message);
-    const feedContainer = document.getElementById('feed-container');
-    if (feedContainer) {
-      feedContainer.innerHTML = '<div class="alert alert-danger">An error occurred while loading the feed.</div>';
-    }
+    console.error("Error loading feed:", err.message);
+    postsContainer.innerHTML =
+      '<div class="alert alert-danger">Error loading feed.</div>';
   }
 });

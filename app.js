@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-
+app.locals.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
 
 // View engine setup

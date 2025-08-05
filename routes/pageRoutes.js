@@ -23,7 +23,10 @@ router.get('/register', redirectIfAuthenticated, (req, res) => {
 
 // Render feed page
 router.get('/feed', isAuthenticated, (req, res) => {
-  res.render('feed');
+  res.render('feed', {
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+  });
 });
+  
 
 module.exports = router;

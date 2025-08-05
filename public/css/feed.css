@@ -1,5 +1,5 @@
 body {
-  background-color: #f8f9fa;
+  background-color: #f4f6f9;
 }
 
 #feedContainer .card {
@@ -9,4 +9,31 @@ body {
 
 #username {
   font-weight: 500;
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+.card img.img-fluid {
+  max-height: 400px;
+  object-fit: cover;
+  margin-top: 1rem;
+}
+
+#posts-Container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.navbar-brand {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#userProfileImage {
+  border: 2px solid #ccc;
 }
