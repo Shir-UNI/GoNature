@@ -4,6 +4,8 @@ const router = express.Router();
 const groupController = require('../controllers/groupController');
 const { isAuthenticated } = require('../middleware/authMiddleware');
 const { validateCreateGroup, validateUpdateGroup } = require('../middleware/groupValidator');
+const validateObjectId = require('../middleware/objectIdValidator');
+
 
 // Create a new group
 router.post('/', isAuthenticated, validateCreateGroup, groupController.createGroup);
@@ -12,18 +14,18 @@ router.post('/', isAuthenticated, validateCreateGroup, groupController.createGro
 router.get('/', isAuthenticated, groupController.getAllGroups);
 
 // Get a specific group by ID
-router.get('/:id', isAuthenticated, groupController.getGroupById);
+router.get('/:id', isAuthenticated, validateObjectId('id', 'group ID'), groupController.getGroupById);
 
 // Update a group
-router.put('/:id', isAuthenticated, validateUpdateGroup, groupController.updateGroup);
+router.put('/:id', isAuthenticated, validateObjectId('id', 'group ID'), validateUpdateGroup, groupController.updateGroup);
 
 // Delete a group
-router.delete('/:id', isAuthenticated, groupController.deleteGroup);
+router.delete('/:id', isAuthenticated, validateObjectId('id', 'group ID'), groupController.deleteGroup);
 
 // Add a member to group
-router.post('/:id/members', isAuthenticated, groupController.addMember);
+router.post('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'), groupController.addMember);
 
 // Remove a member from group
-router.delete('/:id/members', isAuthenticated, groupController.removeMember);
+router.delete('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'), groupController.removeMember);
 
 module.exports = router;
