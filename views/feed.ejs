@@ -91,12 +91,16 @@
   </div>
 
   <!-- Scripts -->
-  <script src="/js/feed.js" defer></script>
+  <script src="/js/feed.js"></script>
+  <script src="/js/mapSetup.js"></script>
 
   <!-- Google Maps API -->
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&libraries=places&callback=initMap">
-    </script>
+  <script
+  src="https://maps.googleapis.com/maps/api/js?key=<%= googleMapsApiKey %>&libraries=places&callback=initMap"
+  async
+  defer>
+  </script>
+
 </body>
 
 </html>
