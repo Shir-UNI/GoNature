@@ -39,20 +39,38 @@ const createPost = async ({ user, content, media, type, group, location }) => {
   return await post.save();
 };
 
-const getPostById = async (id) => {
+const getPostById = async (id, includeDeletedUsers = false) => {
   try {
-    return await Post.findById(id).populate("user").populate("group");
+    const post = await Post.findById(id)
+      .populate("user", "username profileImage isDeleted")
+      .populate("group", "name");
+
+    if (!post) return null;
+
+    if (!includeDeletedUsers && (!post.user || post.user.isDeleted)) {
+      return null;
+    }
+
+    return post;
   } catch (error) {
     return null;
   }
 };
 
-const getAllPosts = async () => {
-  return await Post.find({})
-    .populate("user")
-    .populate("group")
-    .sort({ createdAt: -1 });
+const getAllPosts = async (includeDeletedUsers = false) => {
+  const posts = await Post.find({})
+    .populate("user", "username profileImage isDeleted")
+    .populate("group", "name")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  if (!includeDeletedUsers) {
+    return posts.filter(post => post.user && !post.user.isDeleted);
+  }
+
+  return posts;
 };
+
 
 const updatePost = async (id, userId, updateData) => {
   const post = await Post.findById(id);
@@ -62,7 +80,9 @@ const updatePost = async (id, userId, updateData) => {
 
   // Only the post creator can update it
   if (post.user.toString() !== userId) {
-    throw new Error("Unauthorized: You can only update your own posts");
+    const err = new Error("Unauthorized: You can only update your own posts");
+    err.status = 403;
+    throw err;
   }
 
   // Allow only certain fields to be updated
@@ -96,7 +116,9 @@ const deletePost = async (id, userId) => {
 
   // Only the post creator can delete it
   if (post.user.toString() !== userId) {
-    throw new Error("Unauthorized: You can only delete your own posts");
+    const err = new Error("Unauthorized: You can only delete your own posts");
+    err.status = 403;
+    throw err;
   }
 
   return await Post.findByIdAndDelete(id);

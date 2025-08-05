@@ -1,5 +1,3 @@
-// middleware/groupValidator.js
-
 const validateCreateGroup = (req, res, next) => {
   const { name, description } = req.body;
 

@@ -1,5 +1,3 @@
-// controllers/groupController.js
-
 const groupService = require("../services/groupService");
 
 const createGroup = async (req, res) => {
@@ -12,22 +10,34 @@ const createGroup = async (req, res) => {
     res.status(201).json(group);
   } catch (error) {
     res
-      .status(400)
+      .status(error.status || 400)
       .json({ message: "Failed to create group", error: error.message });
   }
 };
 
 const getGroupById = async (req, res) => {
-  const group = await groupService.getGroupById(req.params.id);
-  if (!group) {
-    return res.status(404).json({ message: "Group not found" });
+  try {
+    const group = await groupService.getGroupById(req.params.id);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+    res.json(group);
+  } catch (error) {
+    res
+      .status(error.status || 500)
+      .json({ message: "Failed to fetch group", error: error.message });
   }
-  res.json(group);
 };
 
 const getAllGroups = async (req, res) => {
-  const groups = await groupService.getAllGroups();
-  res.json(groups);
+  try {
+    const groups = await groupService.getAllGroups();
+    res.json(groups);
+  } catch (error) {
+    res
+      .status(error.status || 500)
+      .json({ message: "Failed to fetch groups", error: error.message });
+  }
 };
 
 const updateGroup = async (req, res) => {
@@ -42,7 +52,9 @@ const updateGroup = async (req, res) => {
     }
     res.json(updatedGroup);
   } catch (error) {
-    res.status(403).json({ message: error.message });
+    res
+      .status(error.status || 403)
+      .json({ message: "Failed to update group", error: error.message });
   }
 };
 
@@ -57,31 +69,43 @@ const deleteGroup = async (req, res) => {
     }
     res.status(204).send();
   } catch (error) {
-    res.status(403).json({ message: error.message });
+    res
+      .status(error.status || 403)
+      .json({ message: "Failed to delete group", error: error.message });
   }
 };
 
 const addMember = async (req, res) => {
-  const { userId } = req.body;
-  const groupId = req.params.id;
-  const { group, error } = await groupService.addMemberToGroup(
-    groupId,
-    userId,
-    req.session.userId
-  );
-  if (error) {
-    return res.status(400).json({ message: error });
+  try {
+    const { userId } = req.body;
+    const groupId = req.params.id;
+    const { group, error } = await groupService.addMemberToGroup(
+      groupId,
+      userId,
+      req.session.userId
+    );
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+    res.json(group);
+  } catch (error) {
+    res
+      .status(error.status || 500)
+      .json({ message: "Failed to add member", error: error.message });
   }
-  res.json(group);
 };
 
 const removeMember = async (req, res) => {
-  const { userId } = req.body;
-  const groupId = req.params.id;
-  const currentUserId  = req.session.userId;
-
   try {
-    const result = await groupService.removeMemberFromGroup(groupId, userId, currentUserId);
+    const { userId } = req.body;
+    const groupId = req.params.id;
+    const currentUserId = req.session.userId;
+
+    const result = await groupService.removeMemberFromGroup(
+      groupId,
+      userId,
+      currentUserId
+    );
 
     if (result.error) {
       return res.status(400).json({ message: result.error });
@@ -89,8 +113,10 @@ const removeMember = async (req, res) => {
 
     res.status(200).json(result.group);
   } catch (error) {
-    console.error('Error removing member:', error);
-    res.status(500).json({ message: 'Failed to remove member', error: error.message });
+    console.error("Error removing member:", error);
+    res
+      .status(error.status || 500)
+      .json({ message: "Failed to remove member", error: error.message });
   }
 };
 
