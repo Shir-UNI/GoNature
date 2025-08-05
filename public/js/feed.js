@@ -56,8 +56,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Load groups the user belongs to
-const loadUserGroups = async () => {
-  const res = await fetch("/api/groups/mine", {
+  const loadUserGroups = async () => {
+  const res = await fetch("/api/groups/my-groups", {
+    method: 'GET',
     credentials: "include",
   });
   if (!res.ok) {
