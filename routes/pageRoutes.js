@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('../middleware/authMiddleware');
+const { isAuthenticated, redirectIfAuthenticated } = require('../middleware/authMiddleware');
 
 // redirect root "/" to login or feed
 router.get('/', (req, res) => {
