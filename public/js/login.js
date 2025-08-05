@@ -1,28 +1,54 @@
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("loginForm");
+  const errorContainer = document.getElementById("errorContainer");
+  const passwordInput = document.getElementById("password");
 
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    });
+    // Clear previous error
+    errorContainer.textContent = "";
+    errorContainer.classList.add("d-none");
 
-    const data = await res.json();
+    const formData = new FormData(form);
+    const data = {
+      email: formData.get("email"),
+      password: formData.get("password")
+    };
 
-    if (res.ok) {
-      window.location.href = '/feed'; // Redirect to feed if login is successful
-    } else {
-      document.getElementById('errorMessage').textContent = data.message || 'Login failed';
-      document.getElementById('errorMessage').style.display = 'block';
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        // Login success - redirect to feed
+        window.location.href = "/feed";
+      } else {
+        // Login failed - show error and clear password
+        const result = await response.json();
+        passwordInput.value = "";
+        showError(result.message || "Login failed");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      passwordInput.value = "";
+      showError("An unexpected error occurred. Please try again.");
     }
-  } catch (err) {
-    document.getElementById('errorMessage').textContent = 'Something went wrong';
-    document.getElementById('errorMessage').style.display = 'block';
+  });
+
+  function showError(message) {
+    errorContainer.textContent = message;
+    errorContainer.classList.remove("d-none");
+
+    // Auto-remove error after 4 seconds
+    setTimeout(() => {
+      errorContainer.classList.add("d-none");
+      errorContainer.textContent = "";
+    }, 4000);
   }
 });

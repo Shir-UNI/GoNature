@@ -3,7 +3,7 @@ body {
   background-size: cover;
   background-position: center;
   height: 100vh;
-  backdrop-filter: brightness(0.75);
+  background: linear-gradient(to bottom right, #e0f7e9, #c0e1ff);
 }
 
 .register-container {
