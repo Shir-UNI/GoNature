@@ -39,20 +39,25 @@ const createPost = async ({ user, content, media, type, group, location }) => {
   return await post.save();
 };
 
-const getPostById = async (id) => {
+const getPostById = async (id, includeDeleted = false) => {
   try {
-    return await Post.findById(id).populate("user").populate("group");
+    const query = includeDeleted ? {} : { isDeleted: { $ne: true } };
+    return await Post.findOne({ _id: id, ...query })
+      .populate("user")
+      .populate("group");
   } catch (error) {
     return null;
   }
 };
 
-const getAllPosts = async () => {
-  return await Post.find({})
+const getAllPosts = async (includeDeleted = false) => {
+  const query = includeDeleted ? {} : { isDeleted: { $ne: true } };
+  return await Post.find(query)
     .populate("user")
     .populate("group")
     .sort({ createdAt: -1 });
 };
+
 
 const updatePost = async (id, userId, updateData) => {
   const post = await Post.findById(id);
