@@ -54,8 +54,6 @@ const deleteUser = async (req, res) => {
 
 // Get currently logged-in user
 const getCurrentUser = async (req, res) => {
-  console.log("this is getcurrentuser");
-  console.log("Session userId:", req.session.userId); //test
   if (!req.session.userId) {
     return res.status(400).json({ message: "User ID is missing from session" });
   }
