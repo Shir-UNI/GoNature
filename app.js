@@ -11,6 +11,8 @@ const postRoutes = require('./routes/postRoutes');
 const groupRoutes = require('./routes/groupRoutes');
 const authRoutes = require('./routes/authRoutes');
 const feedRoutes = require('./routes/feedRoutes');
+const pageRoutes = require('./routes/pageRoutes');
+
 
 require('custom-env').env(process.env.NODE_ENV, './config');
 
@@ -37,6 +39,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // routes
+app.use('/', pageRoutes); // mounted at root, so /feed will work
 app.use('/api/auth', authRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/users', userRoutes);
