@@ -4,6 +4,6 @@ const { isAuthenticated } = require('../middleware/authMiddleware');
 const feedController = require('../controllers/feedController');
 
 // Get feed for logged-in user
-router.get('/', isAuthenticated, feedController.getFeed);
+router.get('/', feedController.getFeed);
 
 module.exports = router;
