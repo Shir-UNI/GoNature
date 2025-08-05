@@ -12,17 +12,17 @@ router.get('/', (req, res) => {
 });
 
 // Render login page
-router.get('/login', (req, res) => {
+router.get('/login', redirectIfAuthenticated, (req, res) => {
   res.render('login');
 });
 
 // Render register page
-router.get('/register', (req, res) => {
+router.get('/register', redirectIfAuthenticated, (req, res) => {
   res.render('register');
 });
 
 // Render feed page
-router.get('/feed', (req, res) => {
+router.get('/feed', isAuthenticated, (req, res) => {
   res.render('feed');
 });
 

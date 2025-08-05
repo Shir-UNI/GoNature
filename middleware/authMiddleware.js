@@ -16,4 +16,15 @@ const checkUserNotDeleted = async (req, res, next) => {
   next();
 };
 
-module.exports = { isAuthenticated, checkUserNotDeleted };
+const redirectIfAuthenticated = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return res.redirect("/feed");
+  }
+  next();
+};
+
+module.exports = {
+  isAuthenticated,
+  redirectIfAuthenticated,
+  checkUserNotDeleted,
+};
