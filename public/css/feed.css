@@ -37,3 +37,14 @@ body {
 #userProfileImage {
   border: 2px solid #ccc;
 }
+
+/* Limit width of the create post section */
+#create-post-card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Add spacing above the posts container */
+#posts-container {
+  margin-top: 20px;
+}
