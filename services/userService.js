@@ -42,12 +42,22 @@ const updateUser = async (id, updateData, currentUserId) => {
 // Delete user only if userId matches the session user
 const deleteUser = async (id, currentUserId) => {
   if (id !== currentUserId) {
-    throw new Error('Unauthorized: You can only delete your own account');
+    const err = new Error('Unauthorized: You can only delete your own account');
+    err.status = 403;
+    throw err;
   }
 
+  // Check if user is an admin of any group
+  const isAdmin = await Group.exists({ admin: id });
+  if (isAdmin) {
+    const err = new Error('Cannot delete user who is an admin of a group. Please transfer ownership first.');
+    err.status = 403;
+    throw err;
+  }
+
+  // Soft delete the user
   return await User.findByIdAndUpdate(id, { isDeleted: true });
 };
-
 module.exports = {
   getUserById,
   getAllUsers,
