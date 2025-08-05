@@ -15,15 +15,20 @@ const createGroup = async ({ name, description, admin }) => {
 
 const getGroupById = async (id) => {
   try {
-    return await Group.findById(id).populate('admin').populate('members');
+    return await Group.findById(id)
+      .populate({ path: 'admin', match: { isDeleted: false } })
+      .populate({ path: 'members', match: { isDeleted: false } });
   } catch (error) {
     return null;
   }
 };
 
 const getAllGroups = async () => {
-  return await Group.find({}).populate('admin').populate('members');
+  return await Group.find({})
+    .populate({ path: 'admin', match: { isDeleted: false } })
+    .populate({ path: 'members', match: { isDeleted: false } });
 };
+
 
 const updateGroup = async (id, updateData, adminId) => {
   const group = await Group.findById(id);
