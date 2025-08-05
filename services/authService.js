@@ -13,7 +13,7 @@ const registerUser = async ({ username, email, password, profileImage }) => {
     username,
     email,
     password: hashedPassword,
-    profileImage
+    profileImage: profileImage
   });
 
   await newUser.save();

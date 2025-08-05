@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     },
     profileImage: {
       type: String,
-      default: "/images/default-profile.png",
+      default: "/public/images/profile-default.png",
     },
     isDeleted: {
       type: Boolean,
