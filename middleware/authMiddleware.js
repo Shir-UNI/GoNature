@@ -1,9 +1,15 @@
 const isAuthenticated = (req, res, next) => {
   if (req.session && req.session.userId) {
     return next();
-  } else {
-    return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
+
+  // If the request expects HTML (from browser), redirect to login page
+  if (req.accepts('html')) {
+    return res.redirect('/login');
+  }
+
+  // If the request is AJAX / API
+  return res.status(401).json({ message: 'Unauthorized: Please log in' });
 };
 
 const checkUserNotDeleted = async (req, res, next) => {
