@@ -39,23 +39,36 @@ const createPost = async ({ user, content, media, type, group, location }) => {
   return await post.save();
 };
 
-const getPostById = async (id, includeDeleted = false) => {
+const getPostById = async (id, includeDeletedUsers = false) => {
   try {
-    const query = includeDeleted ? {} : { isDeleted: { $ne: true } };
-    return await Post.findOne({ _id: id, ...query })
-      .populate("user")
-      .populate("group");
+    const post = await Post.findById(id)
+      .populate("user", "username profileImage isDeleted")
+      .populate("group", "name");
+
+    if (!post) return null;
+
+    if (!includeDeletedUsers && (!post.user || post.user.isDeleted)) {
+      return null;
+    }
+
+    return post;
   } catch (error) {
     return null;
   }
 };
 
-const getAllPosts = async (includeDeleted = false) => {
-  const query = includeDeleted ? {} : { isDeleted: { $ne: true } };
-  return await Post.find(query)
-    .populate("user")
-    .populate("group")
-    .sort({ createdAt: -1 });
+const getAllPosts = async (includeDeletedUsers = false) => {
+  const posts = await Post.find({})
+    .populate("user", "username profileImage isDeleted")
+    .populate("group", "name")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  if (!includeDeletedUsers) {
+    return posts.filter(post => post.user && !post.user.isDeleted);
+  }
+
+  return posts;
 };
 
 
