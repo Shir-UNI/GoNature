@@ -15,7 +15,10 @@ const getUserFeed = async (userId) => {
     .populate('group', 'name')
     .lean();
 
-  return posts;
+   // Filter out posts by deleted users
+  const visiblePosts = posts.filter(post => post.user && !post.user.isDeleted);
+
+  return visiblePosts;
 };
 
 module.exports = {
