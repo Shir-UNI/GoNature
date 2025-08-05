@@ -80,7 +80,9 @@ const updatePost = async (id, userId, updateData) => {
 
   // Only the post creator can update it
   if (post.user.toString() !== userId) {
-    throw new Error("Unauthorized: You can only update your own posts");
+    const err = new Error("Unauthorized: You can only update your own posts");
+    err.status = 403;
+    throw err;
   }
 
   // Allow only certain fields to be updated
@@ -114,7 +116,9 @@ const deletePost = async (id, userId) => {
 
   // Only the post creator can delete it
   if (post.user.toString() !== userId) {
-    throw new Error("Unauthorized: You can only delete your own posts");
+    const err = new Error("Unauthorized: You can only delete your own posts");
+    err.status = 403;
+    throw err;
   }
 
   return await Post.findByIdAndDelete(id);
