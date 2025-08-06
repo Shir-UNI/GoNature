@@ -1,80 +1,140 @@
-import { getCurrentUser, setCurrentUser, getGroupInfo, setGroupInfo } from './groupPage.js';
+// File: public/js/groupPageSideBar.js
 
-// load group side bar by currentuser
-export const loadGroupSidebar = async (groupId) => {
-  // check the current user
-  try {
-    const meRes = await fetch('/api/users/me', { credentials: 'include' });
-    if (meRes.ok) setCurrentUser(await meRes.json());
-  } catch (e) {
-    console.error('Could not load current user', e);
-  }
+import { getCurrentUser, setGroupInfo, getGroupInfo } from './groupPage.js';
 
-  // load the group details
-  const grpRes = await fetch(`/api/groups/${groupId}`, { credentials: 'include' });
-  if (!grpRes.ok) throw new Error('Failed to load group info');
-  const group = await grpRes.json();
+const profileEl = document.getElementById('group-profile');
+const actionsEl = document.getElementById('group-actions');
+
+export async function loadGroupSidebar(groupId) {
+  const res = await fetch(`/api/groups/${groupId}`, { credentials: 'include' });
+  if (!res.ok) throw new Error('Failed to load group data');
+  const group = await res.json();
   setGroupInfo(group);
+  renderGroupProfile(group);
+  renderActionButtons();
+}
 
-  // render profile
-  document.getElementById('group-profile').innerHTML = `
+function renderGroupProfile(group) {
+  profileEl.innerHTML = `
     <div class="card shadow-sm">
       <div class="card-body">
-        <h2 class="mb-1">${group.name}</h2>
-        ${group.description ? `<p class="text-muted">${group.description}</p>` : ''}
+        <h4 class="mb-2">${group.name}</h4>
+        <p class="text-muted mb-0">${group.description || ''}</p>
       </div>
-    </div>
-  `;
+    </div>`;
+}
 
-  updateGroupActionButtons();
-};
-
-// Show action button by permission
-export const updateGroupActionButtons = () => {
+export function renderActionButtons() {
   const user = getCurrentUser();
   const group = getGroupInfo();
-  const container = document.getElementById('group-actions');
-  container.innerHTML = '';
+
+  if (!actionsEl) return;
 
   if (!user) {
-    container.innerHTML = `<a href="/login" class="btn btn-outline-primary">Login to Join</a>`;
+    actionsEl.innerHTML = `
+      <a href="/login" class="btn btn-outline-primary">Login to Join</a>
+    `;
     return;
   }
 
-  const isAdmin = group.admin._id === user._id;
-  const isMember = group.members.some(m => m._id === user._id);
+   // Determine admin ID (handle both populated object or raw ID)
+  const adminId = group.admin && group.admin._id ? String(group.admin._id) : String(group.admin);
+  console.log('adminId', adminId)
 
-  if (isAdmin) {
-    container.innerHTML = `
-      <button id="editGroupBtn" class="btn btn-outline-primary me-2">Edit Group</button>
-      <button id="manageMembersBtn" class="btn btn-outline-danger">Manage Members</button>
+  console.log('current user', String(user._id))
+  console.log('group admin', String(group.admin))
+
+  // Admin
+  if (String(user._id) === adminId) {
+    actionsEl.innerHTML = `
+      <button id="editGroupBtn" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-edit me-1"></i>Edit Group
+      </button>
+      <button id="manageMembersBtn" class="btn btn-outline-info">
+        <i class="fas fa-users me-1"></i>Manage Members
+      </button>
+    `;
+    return;
+  }
+
+  // Member?
+  const isMember = Array.isArray(group.members) &&
+    group.members.some(id => String(id) === String(user._id));
+
+  if (isMember) {
+    actionsEl.innerHTML = `
+      <button id="leaveGroupBtn" class="btn btn-warning">
+        <i class="fas fa-sign-out-alt me-1"></i>Leave Group
+      </button>
     `;
   } else {
-    container.innerHTML = isMember
-      ? `<button id="leaveGroupBtn" class="btn btn-secondary">Leave Group</button>`
-      : `<button id="joinGroupBtn" class="btn btn-outline-success">Join Group</button>`;
+    actionsEl.innerHTML = `
+      <button id="joinGroupBtn" class="btn btn-success">
+        <i class="fas fa-sign-in-alt me-1"></i>Join Group
+      </button>
+    `;
   }
-};
+}
 
-// Listen to click events
-export const initGroupSidebarEvents = (groupId) => {
-  document.addEventListener('click', async (e) => {
+export function initGroupSidebarEvents(groupId) {
+  actionsEl.addEventListener('click', async e => {
     const user = getCurrentUser();
-    if (e.target.id === 'joinGroupBtn') {
-      await fetch(`/api/groups/${groupId}/join`, { method: 'POST', credentials: 'include' });
-      user.groups.push(groupId);
-      updateGroupActionButtons();
+    if (!user) return window.location.href = '/login';
+
+    if (e.target.id === 'joinGroupBtn' || e.target.closest('#joinGroupBtn')) {
+      await handleJoinLeave('add', groupId);
     }
-    if (e.target.id === 'leaveGroupBtn') {
-      await fetch(`/api/groups/${groupId}/leave`, { method: 'POST', credentials: 'include' });
-      user.groups = user.groups.filter(id => id !== groupId);
-      updateGroupActionButtons();
+    if (e.target.id === 'leaveGroupBtn' || e.target.closest('#leaveGroupBtn')) {
+      await handleJoinLeave('remove', groupId);
     }
     if (e.target.id === 'editGroupBtn') {
-      // TODO: show edit modal
+      // TODO: open edit modal
     }
     if (e.target.id === 'manageMembersBtn') {
-      // TODO: show manage-members modal
+      // TODO: open manage members modal
     }
   });
-};
+}
+
+async function handleJoinLeave(action, groupId) {
+  const btnId = action === 'add' ? 'joinGroupBtn' : 'leaveGroupBtn';
+  const btn = document.getElementById(btnId);
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin me-1"></i>Processing...`;
+
+  try {
+    const endpoint = `/api/groups/${groupId}/members`;
+    const options = {
+      method: action === 'add' ? 'POST' : 'DELETE',
+      credentials: 'include',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ userId: getCurrentUser()._id })
+    };
+    const res = await fetch(endpoint, options);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || 'Request failed');
+    }
+
+    // Update local state
+    const group = getGroupInfo();
+    if (action === 'add') {
+      group.members = group.members || [];
+      group.members.push(getCurrentUser()._id);
+    } else {
+      group.members = (group.members || [])
+        .filter(id => String(id) !== String(getCurrentUser()._id));
+    }
+    setGroupInfo(group);
+
+    // Re-render buttons
+    renderActionButtons();
+
+  } catch (err) {
+    console.error('Group join/leave error:', err);
+    alert('Error: ' + err.message);
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
+  }
+}
