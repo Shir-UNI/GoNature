@@ -20,6 +20,24 @@ function showAlert(message, type = "danger") {
   }
 }
 
+document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+  try {
+    const res = await fetch("/api/auth/logout", {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      window.location.href = "/login";
+    } else {
+      showAlert("Logout failed", "danger");
+    }
+  } catch (err) {
+    showAlert("Logout error", "danger");
+  }
+});
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const postsContainer = document.getElementById("posts-container");
   let allPosts = [];

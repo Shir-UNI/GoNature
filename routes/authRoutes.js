@@ -12,6 +12,6 @@ router.post('/register', uploadProfileImage.single('profileImage'), validateRegi
 router.post('/login', validateLogin, authController.loginUser);
 
 // Logout user
-router.post('/logout', authController.logoutUser);
+router.get('/logout', authController.logoutUser);
 
 module.exports = router;
