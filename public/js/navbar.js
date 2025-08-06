@@ -1,4 +1,3 @@
-
 // Debounce function to avoid sending too many requests
 function debounce(func, delay) {
   let timeoutId;
@@ -26,8 +25,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (err) {
     console.error("Failed to load navbar user:", err.message);
   }
-});
 
+  //Logout button
+  document.addEventListener("click", async (e) => {
+    if (e.target.id === "logoutBtn") {
+      try {
+        const res = await fetch("/api/auth/logout", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          window.location.href = "/login";
+        } else {
+          alert("Logout failed.");
+        }
+      } catch (err) {
+        console.error("Logout error:", err.message);
+        alert("An unexpected error occurred.");
+      }
+    }
+  });
+});
 
 // Fetch matching users and groups
 async function fetchSearchResults(query) {
@@ -54,7 +73,8 @@ function displaySearchDropdown({ users, groups }) {
   }
 
   if (users.length === 0 && groups.length === 0) {
-    dropdown.innerHTML = '<span class="dropdown-item text-muted">No results</span>';
+    dropdown.innerHTML =
+      '<span class="dropdown-item text-muted">No results</span>';
     return;
   }
 
@@ -78,14 +98,17 @@ function displaySearchDropdown({ users, groups }) {
 
 const searchInput = document.getElementById("searchQuery");
 if (searchInput) {
-  searchInput.addEventListener("input", debounce((e) => {
-    const query = e.target.value.trim();
-    console.log("🔍 Searching for:", query); // ← הוסיפי שורה זו
-    if (query.length > 1) {
-      fetchSearchResults(query);
-    } else {
-      const dropdown = document.getElementById("searchDropdown");
-      if (dropdown) dropdown.remove();
-    }
-  }, 300));
+  searchInput.addEventListener(
+    "input",
+    debounce((e) => {
+      const query = e.target.value.trim();
+      console.log("🔍 Searching for:", query); // ← הוסיפי שורה זו
+      if (query.length > 1) {
+        fetchSearchResults(query);
+      } else {
+        const dropdown = document.getElementById("searchDropdown");
+        if (dropdown) dropdown.remove();
+      }
+    }, 300)
+  );
 }
