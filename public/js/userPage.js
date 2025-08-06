@@ -129,6 +129,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   let editingPostId = null;
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("delete-post-btn")) {
+      const postId = e.target.dataset.id;
+      const confirmed = confirm("Are you sure you want to delete this post?");
+      if (!confirmed) return;
+
+      try {
+        const res = await fetch(`/api/posts/${postId}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Failed to delete post");
+
+        await loadUserPosts(); // Refresh after deletion
+      } catch (err) {
+        alert("Error deleting post: " + err.message);
+      }
+    }
+  });
 
   document.addEventListener("click", (e) => {
     // 📝 Handle Edit click
