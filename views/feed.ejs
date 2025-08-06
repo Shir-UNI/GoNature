@@ -95,8 +95,11 @@
                 <span id="mediaFileName">No file selected</span>
               </div>
               <input type="file" id="newPostMedia" accept="image/*" class="d-none">
-                <div id="mediaPreview" style="display: none;" class="mt-2">
-                  <img id="previewImage" class="img-fluid rounded" style="max-height: 200px;" />
+                <div id="mediaPreview" style="display: none;" class="mt-2 position-relative">
+                  <button type="button" id="removeMediaBtn"
+                    class="btn-close position-absolute top-0 end-0" aria-label="Remove media"
+                    style="z-index: 10;"></button>
+                  <img id="previewImage" class="img-fluid rounded mb-2" style="max-height: 200px; display: none;" />
                   <video id="previewVideo" class="img-fluid rounded" controls style="max-height: 200px; display: none;"></video>
                 </div>
             </div>

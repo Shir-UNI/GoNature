@@ -106,13 +106,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             <img src="${
               post.user.profileImage
             }" class="rounded-circle me-2" width="40" height="40" alt="${
-              post.user.username
-            }'s profile">
+        post.user.username
+      }'s profile">
             <div>
               <strong>${post.user.username}</strong><br/>
               <small class="text-muted">in ${post.group.name} • ${new Date(
-              post.createdAt
-            ).toLocaleString()}</small>
+        post.createdAt
+      ).toLocaleString()}</small>
             </div>
           </div>
           <p>${post.content}</p>
@@ -235,6 +235,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("mediaFileName").textContent = "No file selected";
     document.getElementById("mediaPreview").style.display = "none";
     await loadPosts();
+
+    // Collapse the post form
+    const collapse = bootstrap.Collapse.getOrCreateInstance(
+      document.getElementById("createPostCollapse")
+    );
+    collapse.hide();
   };
 
   const getMediaType = (file) => {
@@ -277,6 +283,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const previewImage = document.getElementById("previewImage");
     const previewVideo = document.getElementById("previewVideo");
     const previewContainer = document.getElementById("mediaPreview");
+    const removeBtn = document.getElementById("removeMediaBtn");
 
     if (file) {
       fileNameSpan.textContent = file.name;
@@ -289,6 +296,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           previewImage.style.display = "block";
           previewVideo.style.display = "none";
           previewContainer.style.display = "block";
+          removeBtn.style.display = "block";
         };
         reader.readAsDataURL(file);
       } else if (type === "video") {
@@ -297,18 +305,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         previewVideo.style.display = "block";
         previewImage.style.display = "none";
         previewContainer.style.display = "block";
+        removeBtn.style.display = "block";
       } else {
-        previewContainer.style.display = "none";
+        fileNameSpan.textContent = "Unsupported file";
         previewImage.style.display = "none";
         previewVideo.style.display = "none";
-        fileNameSpan.textContent = "Unsupported file";
+        previewContainer.style.display = "none";
+        removeBtn.style.display = "none";
       }
     } else {
       fileNameSpan.textContent = "No file selected";
-      previewContainer.style.display = "none";
       previewImage.style.display = "none";
       previewVideo.style.display = "none";
+      previewContainer.style.display = "none";
+      removeBtn.style.display = "none";
     }
+  });
+
+  // Clear button logic
+  document.getElementById("removeMediaBtn")?.addEventListener("click", () => {
+    mediaInput.value = "";
+    previewImage.src = "";
+    previewVideo.src = "";
+    previewImage.style.display = "none";
+    previewVideo.style.display = "none";
+    previewContainer.style.display = "none";
+    fileNameSpan.textContent = "No file selected";
+    document.getElementById("removeMediaBtn").style.display = "none";
   });
 
   document
