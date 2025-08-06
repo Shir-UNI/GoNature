@@ -1,3 +1,5 @@
+import { renderMonthlyBarChart, loadMonthlyStats } from "./chartUtils.js";
+
 document.addEventListener("DOMContentLoaded", async () => {
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const userId = pathParts[pathParts.length - 1];
@@ -228,6 +230,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadCurrentUser();
     await loadUserProfile();
     await loadUserPosts();
+    const stats = await loadMonthlyStats(userId);
+    renderMonthlyBarChart(stats, "userStatsChart");
   } catch (err) {
     console.error("Failed to load user page:", err.message);
     postsContainer.innerHTML = `<div class="alert alert-danger">Error loading page.</div>`;
