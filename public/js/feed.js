@@ -43,13 +43,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   let allPosts = [];
 
   // Load current user info
-  const loadUser = async () => {
-    const res = await fetch("/api/users/me", { credentials: "include" });
-    if (!res.ok) throw new Error("Failed to fetch user");
-    const user = await res.json();
-    document.getElementById("usernameDisplay").textContent = user.username;
-    document.getElementById("userProfileImage").src = user.profileImage;
-  };
+  // Load current user info
+const loadUser = async () => {
+  const res = await fetch("/api/users/me", { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch user");
+  const user = await res.json();
+
+  // Update username
+  const usernameDisplay = document.getElementById("usernameDisplay");
+  if (usernameDisplay) {
+    usernameDisplay.textContent = user.username;
+  }
+
+  // Update profile image
+  const profileImg = document.getElementById("userProfileImage");
+  if (profileImg) {
+    profileImg.src = user.profileImage || "/images/profile-default.png";
+  }
+
+  // Update profile link
+  const profileLink = document.getElementById("profileLink");
+  if (profileLink && user?._id) {
+    profileLink.href = `/users/${user._id}`;
+  }
+};
+
 
   // Initialize flatpickr for date range filtering
   flatpickr("#filterDateRange", {
@@ -127,10 +145,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         post.user.username
       }'s profile">
             <div>
-              <strong>${post.user.username}</strong><br/>
-              <small class="text-muted">in ${post.group.name} • ${new Date(
-        post.createdAt
-      ).toLocaleString()}</small>
+              <strong>
+                <a href="/users/${post.user._id}" class="text-decoration-none text-dark">
+                  ${post.user.username}
+                </a>
+              </strong><br/>
+              <small class="text-muted">
+                in <a href="/groups/${post.group._id}" class="text-decoration-none text-secondary">
+                  ${post.group.name}
+                </a> • ${new Date(post.createdAt).toLocaleString()}
+              </small>
             </div>
           </div>
           <p>${post.content}</p>
