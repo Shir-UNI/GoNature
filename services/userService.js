@@ -73,9 +73,58 @@ const deleteUser = async (id, currentUserId) => {
   return await User.findByIdAndUpdate(id, { isDeleted: true });
 };
 
+const followUser = async (targetUserId, currentUserId) => {
+  if (targetUserId === currentUserId) {
+    const err = new Error("You cannot follow yourself");
+    err.status = 400;
+    throw err;
+  }
+
+  const currentUser = await User.findById(currentUserId);
+  const targetUser = await User.findById(targetUserId);
+
+  if (
+    !currentUser ||
+    currentUser.isDeleted ||
+    !targetUser ||
+    targetUser.isDeleted
+  ) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  if (currentUser.following.includes(targetUserId)) {
+    const err = new Error("Already following this user");
+    err.status = 400;
+    throw err;
+  }
+
+  currentUser.following.push(targetUserId);
+  await currentUser.save();
+};
+
+const unfollowUser = async (targetUserId, currentUserId) => {
+  const currentUser = await User.findById(currentUserId);
+
+  if (!currentUser || currentUser.isDeleted) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  currentUser.following = currentUser.following.filter(
+    (id) => id.toString() !== targetUserId
+  );
+
+  await currentUser.save();
+};
+
 module.exports = {
   getUserById,
   getAllUsers,
   updateUser,
   deleteUser,
+  followUser,
+  unfollowUser,
 };

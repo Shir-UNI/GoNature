@@ -12,6 +12,10 @@ router.get('/me', isAuthenticated, userController.getCurrentUser);
 // Get all users
 router.get('/', isAuthenticated, userController.getAllUsers);
 
+// Follow & unfollow routes
+router.post('/:id/follow', isAuthenticated, validateUserIdParam, userController.followUser);
+router.post('/:id/unfollow', isAuthenticated, validateUserIdParam, userController.unfollowUser);
+
 // Get single user by ID
 router.get('/:id', isAuthenticated, validateUserIdParam, userController.getUserById);
 

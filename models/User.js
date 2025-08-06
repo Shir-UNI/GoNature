@@ -25,8 +25,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    interests: [String],
-    groups: [{ type: mongoose.Schema.Types.ObjectId, ref: "Group" }],
+    following: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,

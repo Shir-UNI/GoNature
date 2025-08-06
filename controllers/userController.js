@@ -86,10 +86,30 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+const followUser = async (req, res) => {
+  try {
+    await userService.followUser(req.params.id, req.session.userId);
+    res.status(200).json({ message: "User followed successfully" });
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
+const unfollowUser = async (req, res) => {
+  try {
+    await userService.unfollowUser(req.params.id, req.session.userId);
+    res.status(200).json({ message: "User unfollowed successfully" });
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getUserById,
   getAllUsers,
   updateUser,
   deleteUser,
   getCurrentUser,
+  followUser,
+  unfollowUser,
 };
