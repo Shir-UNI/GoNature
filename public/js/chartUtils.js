@@ -119,7 +119,6 @@ export const renderContributorBarChart = (data, containerId) => {
 };
 
 export const loadGroupStats = async (groupId) => {
-  console.log('chartutil: groupId', groupId);
   const res = await fetch(`/api/groups/${groupId}/stats`, {
     credentials: 'include'
   });
