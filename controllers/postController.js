@@ -96,6 +96,20 @@ const getPostsByUser = async (req, res) => {
   }
 };
 
+const getMonthlyPostStats = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+
+    const stats = await postService.aggregatePostsPerMonth(userId, sixMonthsAgo);
+    res.status(200).json(stats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -103,4 +117,5 @@ module.exports = {
   updatePost,
   deletePost,
   getPostsByUser,
+  getMonthlyPostStats,
 };

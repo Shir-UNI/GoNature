@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Post = require("../models/Post");
 const Group = require("../models/Group");
 
@@ -136,6 +138,30 @@ const getPostsByUser = async (userId) => {
   }
 };
 
+const aggregatePostsPerMonth = async (userId, fromDate) => {
+  return Post.aggregate([
+    {
+      $match: {
+        user: new mongoose.Types.ObjectId(userId),
+        createdAt: { $gte: fromDate }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" }
+        },
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $sort: { "_id.year": 1, "_id.month": 1 }
+    }
+  ]);
+};
+
+
 module.exports = {
   createPost,
   getPostById,
@@ -143,4 +169,5 @@ module.exports = {
   updatePost,
   deletePost,
   getPostsByUser,
+  aggregatePostsPerMonth,
 };

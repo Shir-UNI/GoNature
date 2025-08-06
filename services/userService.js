@@ -3,14 +3,21 @@ const Group = require("../models/Group");
 
 // Get user by ID (only if not deleted)
 const getUserById = async (id) => {
-  const user = await User.findOne({ _id: id, isDeleted: false }).select(
-    "-password"
-  );
+  const user = await User.findOne({ _id: id, isDeleted: false })
+    .select("-password")
+    .populate({
+      path: "following",
+      match: { isDeleted: false }, 
+      select: "username profileImage", 
+    })
+    .lean();
+
   if (!user) {
     const err = new Error("User not found");
     err.status = 404;
     throw err;
   }
+
   return user;
 };
 

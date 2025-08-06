@@ -66,3 +66,23 @@ body {
 .clear-date-btn:hover {
   color: #000;
 }
+
+/* General D3 chart container */
+.d3-chart {
+  max-width: 100%;
+  height: auto;
+  overflow-x: auto;
+}
+
+/* Adjust posts layout */
+#user-posts {
+  padding-left: 10px;
+}
+
+/* Optional: shrink chart if window is small */
+@media (max-width: 768px) {
+  .d3-chart svg {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
