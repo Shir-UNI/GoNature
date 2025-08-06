@@ -22,4 +22,7 @@ router.put('/:id', validateObjectId('id', 'post ID'), isAuthenticated, validateU
 // Delete a post
 router.delete('/:id', validateObjectId('id', 'post ID'), isAuthenticated, postController.deletePost);
 
+//Get posts by user ID
+router.get("/user/:userId", postController.getPostsByUser);
+
 module.exports = router;

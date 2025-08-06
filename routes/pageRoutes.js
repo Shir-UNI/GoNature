@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated, redirectIfAuthenticated } = require('../middleware/authMiddleware');
+const userPageController = require("../controllers/userPageController");
+
 
 // redirect root "/" to login or feed
 router.get('/', (req, res) => {
@@ -27,5 +29,11 @@ router.get('/feed', isAuthenticated, (req, res) => {
     googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
   });
 });
+
+//Render user page
+router.get("/users/:userId", (req, res) => {
+  res.render("userPage", { userId: req.params.userId });
+});
+
   
 module.exports = router;

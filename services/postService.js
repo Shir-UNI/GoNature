@@ -122,10 +122,25 @@ const deletePost = async (id, userId) => {
   return await Post.findByIdAndDelete(id);
 };
 
+const getPostsByUser = async (userId) => {
+  try {
+    const posts = await Post.find({ user: userId })
+      .populate("group", "name") // get group name for the D3 chart
+      .populate("user", "username profileImage") // in case it's needed
+      .sort({ createdAt: -1 });
+    return posts;
+  } catch (err) {
+    const error = new Error("Failed to fetch posts by user");
+    error.status = 500;
+    throw error;
+  }
+};
+
 module.exports = {
   createPost,
   getPostById,
   getAllPosts,
   updatePost,
   deletePost,
+  getPostsByUser,
 };
