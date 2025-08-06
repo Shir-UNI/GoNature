@@ -33,13 +33,13 @@ const profileImageFilter = (req, file, cb) => {
 // POST MEDIA FILTER
 const postMediaFilter = (req, file, cb) => {
   const imageTypes = /jpeg|jpg|png/;
-  const videoTypes = /mp4|mov|avi|webm/;
+  const videoExts = /mp4|mov|avi|webm/;
 
-  const ext = path.extname(file.originalname).toLowerCase().slice(1); // remove the dot
-  const mime = file.mimetype;
+  const ext = path.extname(file.originalname).toLowerCase().slice(1);
+  const mime = file.mimetype.toLowerCase();
 
-  const isImage = imageTypes.test(ext) && imageTypes.test(mime);
-  const isVideo = videoTypes.test(ext) && videoTypes.test(mime);
+  const isImage = imageTypes.test(ext) && mime.startsWith("image/");
+  const isVideo = videoExts.test(ext) && mime.startsWith("video/");
 
   if (isImage || isVideo) {
     cb(null, true);
