@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Profile | GoNature</title>
+    <link rel="stylesheet" href="/css/feed.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <%- include('partials/navbar') %>
+
+    <!-- User Page Content -->
+    <div class="container mt-4">
+        <!-- Match expected IDs -->
+        <div id="user-profile" class="text-center mb-4">
+            <img id="user-profile-img" src="" class="rounded-circle" width="100" height="100" alt="Profile Image" />
+            <h2 id="user-username" class="mt-2"></h2>
+        </div>
+
+        <div id="user-actions" class="text-center mb-4"></div>
+        <!-- Edit User Modal -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editUserForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="editUserAlert" class="alert alert-danger d-none"></div>
+
+                <div class="mb-3">
+                <label for="editUsername" class="form-label">Username</label>
+                <input type="text" class="form-control" id="editUsername" name="username">
+                </div>
+
+                <div class="mb-3">
+                <label for="editEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="editEmail" name="email">
+                </div>
+
+                <div class="mb-3">
+                <label for="editPassword" class="form-label">New Password</label>
+                <input type="password" class="form-control" id="editPassword" name="password">
+                </div>
+
+                <div class="mb-3">
+                <label for="editProfileImage" class="form-label">Profile Image</label>
+                <input type="file" class="form-control" id="editProfileImage" name="profileImage">
+                <img id="profileImagePreview" src="" class="mt-2 rounded" style="max-width: 150px; display: none;" alt="Preview">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+            </form>
+        </div>
+        </div>
+        <div id="user-posts" class="mt-3 row"></div>
+    </div>
+
+    <!-- User context -->
+    <script>
+        const currentUserId = "<%= typeof user !== 'undefined' ? user._id : null %>";
+        const viewedUserId = "<%= userId %>";
+    </script>
+
+    <!-- Scripts -->
+    <script src="/js/userPage.js" defer></script>
+    <script src="/js/navbar.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+</body>
+
+</html>

@@ -3,14 +3,15 @@ const isAuthenticated = (req, res, next) => {
     return next();
   }
 
-  // If the request expects HTML (from browser), redirect to login page
-  if (req.accepts('html')) {
-    return res.redirect('/login');
+  // If the request is to an API route, return JSON response
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(401).json({ message: "Unauthorized: Please log in" });
   }
 
-  // If the request is AJAX / API
-  return res.status(401).json({ message: 'Unauthorized: Please log in' }); 
+  // Otherwise, redirect to login (for HTML pages)
+  return res.redirect("/login");
 };
+
 
 const checkUserNotDeleted = async (req, res, next) => {
   const user = await User.findById(req.session.userId);
