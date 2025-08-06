@@ -31,7 +31,7 @@ router.get('/feed', isAuthenticated, (req, res) => {
 });
 
 //Render user page
-router.get("/users/:userId", (req, res) => {
+router.get("/users/:userId", isAuthenticated, (req, res) => {
   res.render("userPage", { userId: req.params.userId });
 });
 

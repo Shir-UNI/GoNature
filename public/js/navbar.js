@@ -10,6 +10,25 @@ function debounce(func, delay) {
   };
 }
 
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const res = await fetch("/api/users/me", { credentials: "include" });
+    if (!res.ok) return;
+    const user = await res.json();
+
+    const profileImg = document.getElementById("userProfileImage");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const profileLink = document.getElementById("profileLink");
+
+    if (profileImg) profileImg.src = user.profileImage;
+    if (usernameDisplay) usernameDisplay.textContent = user.username;
+    if (profileLink) profileLink.href = `/users/${user._id}`;
+  } catch (err) {
+    console.error("Failed to load navbar user:", err.message);
+  }
+});
+
+
 // Fetch matching users and groups
 async function fetchSearchResults(query) {
   try {
