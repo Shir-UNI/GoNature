@@ -31,10 +31,8 @@ const createPost = async ({ user, content, media, type, group, location }) => {
     type,
     group,
     location,
+    media: media || undefined,
   });
-
-  if (type === "image" && media) post.imageUrl = media;
-  if (type === "video" && media) post.videoUrl = media;
 
   return await post.save();
 };

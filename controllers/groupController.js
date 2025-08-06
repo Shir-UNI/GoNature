@@ -125,7 +125,6 @@ const removeMember = async (req, res) => {
 const getGroupsByCurrentUser = async (req, res) => {
   try {
     const userId = req.session.userId;
-    console.log("User ID from session:", userId);
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });

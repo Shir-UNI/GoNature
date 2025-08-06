@@ -1,3 +1,26 @@
+// Global variable to hold timeout ID
+let alertTimeoutId;
+/**
+ * Display a styled alert box
+ * @param {string} message - The message to show
+ * @param {string} type - 'danger', 'success', 'info', 'warning'
+ */
+function showAlert(message, type = "danger") {
+  const container = document.getElementById("alertContainer");
+  container.innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+   if (timeout) {
+    setTimeout(() => {
+      container.innerHTML = "";
+    }, timeout);
+  }
+}
+
+
 document.addEventListener("DOMContentLoaded", async () => {
   const postsContainer = document.getElementById("posts-container");
   let allPosts = [];
@@ -129,25 +152,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Submit a new post
   const handlePostSubmit = async (e) => {
     e.preventDefault();
+
     const content = document.getElementById("newPostContent").value.trim();
     const mediaFile = document.getElementById("newPostMedia").files[0];
     const groupId = document.getElementById("postGroup").value;
     const lat = document.getElementById("locationLat").value;
     const lng = document.getElementById("locationLng").value;
 
-    if (!content && !mediaFile) return;
+    const hasContent = content !== "";
+    const hasMedia = !!mediaFile;
+
     if (!groupId) {
-      alert("Please select a group");
+      showAlert("Please select a group", "danger");
       return;
     }
 
+    if (!hasContent && !hasMedia) {
+      showAlert("Post must include either text or media", "danger");
+      return;
+    }
+
+    const type = hasMedia ? getMediaType(mediaFile) : "text";
+    if (!["text", "image", "video"].includes(type)) {
+      showAlert("Unsupported post type", "danger");
+      return;
+    }
+
+    if ((type === "image" || type === "video") && !hasMedia) {
+      showAlert("Media is required for image/video post", "danger");
+      return;
+    }
+
+    // Build form data
     const formData = new FormData();
     formData.append("content", content);
     formData.append("group", groupId);
-    if (mediaFile) formData.append("media", mediaFile);
+    formData.append("type", type);
+    if (hasMedia) formData.append("media", mediaFile);
     if (lat && lng) {
-      formData.append("locationLat", lat);
-      formData.append("locationLng", lng);
+      const location = JSON.stringify({
+        type: "Point",
+        coordinates: [parseFloat(lng), parseFloat(lat)],
+      });
+      formData.append("location", location);
     }
 
     const res = await fetch("/api/posts", {
@@ -157,7 +204,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     if (!res.ok) {
-      alert("Failed to post");
+      const error = await res.json();
+      showAlert("Error: " + error.message, "danger");
       return;
     }
 
@@ -166,6 +214,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("mediaPreview").style.display = "none";
     await loadPosts();
   };
+
+const getMediaType = (file) => {
+  const type = file.type;
+  if (type.startsWith("image/")) return "image";
+  if (type.startsWith("video/")) return "video";
+  return "unknown";
+};
+
 
   // Image upload preview
   const mediaInput = document.getElementById("newPostMedia");

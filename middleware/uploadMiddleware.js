@@ -48,6 +48,15 @@ const postMediaFilter = (req, file, cb) => {
   }
 };
 
+const attachMediaUrl = (req, res, next) => {
+  if (req.file) {
+    const filePath = `/uploads/posts/${req.file.filename}`;
+    req.body.media = filePath; // תמיד נכניס את זה לשדה media
+  }
+
+  next();
+};
+
 // EXPORT TWO UPLOADERS
 
 // Single image for registration
@@ -58,5 +67,6 @@ const uploadPostMedia = multer({ storage, fileFilter: postMediaFilter });
 
 module.exports = {
   uploadProfileImage,
-  uploadPostMedia
+  uploadPostMedia,
+  attachMediaUrl
 };

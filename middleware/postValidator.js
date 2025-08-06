@@ -1,5 +1,5 @@
 const validateCreatePost = (req, res, next) => {
-  const { content, type, media, location } = req.body;
+  let { content, type, media, location } = req.body;
 
   const hasContent = content && typeof content === 'string' && content.trim() !== '';
   const hasMedia = typeof media === 'string' && media.trim() !== '';
@@ -15,6 +15,15 @@ const validateCreatePost = (req, res, next) => {
     return res.status(400).json({ message: 'Media URL is required for image/video posts' });
   }
 
+  if (typeof location === 'string') {
+    try {
+      location = JSON.parse(location);
+      req.body.location = location;
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid JSON format for location' });
+    }
+  }
+
   if (location) {
     const { type: locType, coordinates } = location;
     if (locType !== 'Point' || !Array.isArray(coordinates) || coordinates.length !== 2) {
@@ -24,7 +33,6 @@ const validateCreatePost = (req, res, next) => {
 
   next();
 };
-
 const validateUpdatePost = (req, res, next) => {
   const { content, type, media, location } = req.body;
 

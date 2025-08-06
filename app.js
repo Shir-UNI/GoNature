@@ -35,6 +35,7 @@ app.use(session({
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+app.use('/uploads', express.static('public/uploads'));
 
 app.locals.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
