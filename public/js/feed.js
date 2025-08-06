@@ -37,37 +37,35 @@ document.getElementById("logoutBtn")?.addEventListener("click", async () => {
   }
 });
 
-
 document.addEventListener("DOMContentLoaded", async () => {
   const postsContainer = document.getElementById("posts-container");
   let allPosts = [];
 
   // Load current user info
   // Load current user info
-const loadUser = async () => {
-  const res = await fetch("/api/users/me", { credentials: "include" });
-  if (!res.ok) throw new Error("Failed to fetch user");
-  const user = await res.json();
+  const loadUser = async () => {
+    const res = await fetch("/api/users/me", { credentials: "include" });
+    if (!res.ok) throw new Error("Failed to fetch user");
+    const user = await res.json();
 
-  // Update username
-  const usernameDisplay = document.getElementById("usernameDisplay");
-  if (usernameDisplay) {
-    usernameDisplay.textContent = user.username;
-  }
+    // Update username
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    if (usernameDisplay) {
+      usernameDisplay.textContent = user.username;
+    }
 
-  // Update profile image
-  const profileImg = document.getElementById("userProfileImage");
-  if (profileImg) {
-    profileImg.src = user.profileImage || "/images/profile-default.png";
-  }
+    // Update profile image
+    const profileImg = document.getElementById("userProfileImage");
+    if (profileImg) {
+      profileImg.src = user.profileImage || "/images/profile-default.png";
+    }
 
-  // Update profile link
-  const profileLink = document.getElementById("profileLink");
-  if (profileLink && user?._id) {
-    profileLink.href = `/users/${user._id}`;
-  }
-};
-
+    // Update profile link
+    const profileLink = document.getElementById("profileLink");
+    if (profileLink && user?._id) {
+      profileLink.href = `/users/${user._id}`;
+    }
+  };
 
   // Initialize flatpickr for date range filtering
   flatpickr("#filterDateRange", {
@@ -124,6 +122,33 @@ const loadUser = async () => {
     displayPosts(allPosts);
   };
 
+  // fetch weather to post with openweatherAPI
+  async function fetchWeatherForPost(postId, lat, lon) {
+    try {
+      const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`, {
+        credentials: "include",
+      });
+
+      const el = document.getElementById(`weather-${postId}`);
+
+      if (!res.ok) {
+        el.textContent = "Weather data unavailable.";
+        return;
+      }
+
+      const data = await res.json();
+      el.innerHTML = `
+        📍 <strong>${data.locationName}</strong><br/>
+        🌤 ${data.description}, ${data.temperature}°C
+        <img src="https://openweathermap.org/img/wn/${data.icon}@2x.png" alt="weather icon" style="height: 24px; vertical-align: middle;" />
+      `;
+    } catch (err) {
+      const el = document.getElementById(`weather-${postId}`);
+      if (el) el.textContent = "Error loading weather.";
+      console.error(err);
+    }
+  }
+
   // Display given array of posts in the DOM
   const displayPosts = (posts) => {
     postsContainer.innerHTML = "";
@@ -145,23 +170,30 @@ const loadUser = async () => {
         post.user.username
       }'s profile">
             <div>
-              <strong>
-                <a href="/users/${post.user._id}" class="text-decoration-none text-dark">
-                  ${post.user.username}
-                </a>
-              </strong><br/>
-              <small class="text-muted">
-                in <a href="/groups/${post.group._id}" class="text-decoration-none text-secondary">
-                  ${post.group.name}
-                </a> • ${new Date(post.createdAt).toLocaleString()}
-              </small>
+              <strong>${post.user.username}</strong><br/>
+              <small class="text-muted">in ${post.group.name} • ${new Date(
+        post.createdAt
+      ).toLocaleString()}</small>
             </div>
           </div>
           <p>${post.content}</p>
           ${renderMedia(post)}
+          <div class="weather-info text-muted small mt-2" id="weather-${
+            post._id
+          }">Loading weather...</div>
         </div>
       `;
+
       postsContainer.appendChild(card);
+
+      // Fetch and display weather if location exists
+      if (post.location?.coordinates?.length === 2) {
+        const [lng, lat] = post.location.coordinates;
+        fetchWeatherForPost(post._id, lat, lng);
+      } else {
+        const weatherEl = document.getElementById(`weather-${post._id}`);
+        if (weatherEl) weatherEl.textContent = "No location data.";
+      }
     });
   };
 

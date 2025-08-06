@@ -15,27 +15,22 @@ const getWeatherByCoords = (lat, lon) => {
       res.on("end", () => {
         try {
           const json = JSON.parse(data);
-
-          if (res.statusCode >= 400) {
-            const message =
-              json?.message || "Weather API returned an error";
-            return reject({ status: res.statusCode, message });
-          }
-
           const result = {
+            locationName: json.name, // ← הוספנו את זה
             description: json.weather?.[0]?.description,
             temperature: json.main?.temp,
             icon: json.weather?.[0]?.icon,
           };
           resolve(result);
         } catch (err) {
-          reject({ status: 500, message: "Failed to parse weather data" });
+          reject("Failed to parse weather data");
         }
       });
     }).on("error", (err) => {
-      reject({ status: 500, message: "Error fetching weather data: " + err.message });
+      reject("Error fetching weather data: " + err.message);
     });
   });
 };
+
 
 module.exports = { getWeatherByCoords };
