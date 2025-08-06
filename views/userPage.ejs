@@ -95,6 +95,32 @@
             </div>
         </div>
 
+        <!-- Edit Post Modal -->
+        <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="editPostForm" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="editPostAlert" class="alert alert-danger d-none"></div>
+
+                        <div class="mb-3">
+                            <label for="editPostContent" class="form-label">Content</label>
+                            <textarea class="form-control" id="editPostContent" name="content" rows="4"
+                                required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- User context -->
         <script>
             const currentUserId = "<%= typeof user !== 'undefined' ? user._id : null %>";

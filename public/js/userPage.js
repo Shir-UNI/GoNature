@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       credentials: "include",
     });
     if (!res.ok) throw new Error("Failed to load posts");
+
     const posts = await res.json();
 
     if (posts.length === 0) {
@@ -92,26 +93,100 @@ document.addEventListener("DOMContentLoaded", async () => {
     posts.forEach((post) => {
       const card = document.createElement("div");
       card.className = "card mb-3 shadow-sm";
-      card.innerHTML = `
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <div class="d-flex align-items-center">
-              <img src="${
-                post.user.profileImage
-              }" class="rounded-circle me-2" width="40" height="40">
-              <strong>${post.user.username}</strong>
-            </div>
-            <small class="text-muted">${new Date(
-              post.createdAt
-            ).toLocaleString()}</small>
+
+      // Build post content
+      let postHTML = `
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex align-items-center">
+            <img src="${
+              post.user.profileImage
+            }" class="rounded-circle me-2" width="40" height="40">
+            <strong>${post.user.username}</strong>
           </div>
-          <p>${post.content}</p>
-          ${renderMedia(post)}
+          <small class="text-muted">${new Date(
+            post.createdAt
+          ).toLocaleString()}</small>
+        </div>
+        <p>${post.content}</p>
+        ${renderMedia(post)}
+    `;
+
+      // Only show Edit/Delete buttons if current user is the owner
+      if (currentUser && currentUser._id === post.user._id) {
+        postHTML += `
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button class="btn btn-sm btn-outline-primary edit-post-btn" data-id="${post._id}">Edit</button>
+          <button class="btn btn-sm btn-outline-danger delete-post-btn" data-id="${post._id}">Delete</button>
         </div>
       `;
+      }
+
+      postHTML += `</div>`; // Close card-body
+      card.innerHTML = postHTML;
       postsContainer.appendChild(card);
     });
   };
+
+  let editingPostId = null;
+
+  document.addEventListener("click", (e) => {
+    // 📝 Handle Edit click
+    if (e.target.classList.contains("edit-post-btn")) {
+      editingPostId = e.target.dataset.id;
+      const card = e.target.closest(".card");
+      const content = card.querySelector("p").textContent;
+
+      document.getElementById("editPostContent").value = content;
+      document.getElementById("editPostAlert").classList.add("d-none");
+
+      const modal = new bootstrap.Modal(
+        document.getElementById("editPostModal")
+      );
+      modal.show();
+    }
+  });
+
+  document
+    .getElementById("editPostForm")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const content = document.getElementById("editPostContent").value.trim();
+      const alertBox = document.getElementById("editPostAlert");
+
+      if (!content) {
+        alertBox.textContent = "Content is required";
+        alertBox.classList.remove("d-none");
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/posts/${editingPostId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ content }),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          alertBox.textContent = result.message || "Update failed";
+          alertBox.classList.remove("d-none");
+          return;
+        }
+
+        // Close modal and refresh posts
+        bootstrap.Modal.getInstance(
+          document.getElementById("editPostModal")
+        ).hide();
+        await loadUserPosts();
+      } catch (err) {
+        alertBox.textContent = "Unexpected error";
+        alertBox.classList.remove("d-none");
+      }
+    });
 
   const renderMedia = (post) => {
     if (!post.media) return "";
@@ -237,35 +312,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   document.addEventListener("click", async (e) => {
-  if (e.target.id === "toggleFollowingBtn") {
-    const target = document.getElementById("followingCollapse");
-    const alreadyLoaded = target.getAttribute("data-loaded");
+    if (e.target.id === "toggleFollowingBtn") {
+      const target = document.getElementById("followingCollapse");
+      const alreadyLoaded = target.getAttribute("data-loaded");
 
-    if (!alreadyLoaded) {
-      await renderFollowedUsers();
-      target.setAttribute("data-loaded", "true"); // avoid multiple fetches
+      if (!alreadyLoaded) {
+        await renderFollowedUsers();
+        target.setAttribute("data-loaded", "true"); // avoid multiple fetches
+      }
     }
-  }
 
-  // Follow/Unfollow button
-  if (e.target.id === "followUserBtn") {
-    const isFollowing = e.target.textContent === "Unfollow";
-    const endpoint = `/api/users/${userId}/${isFollowing ? "unfollow" : "follow"}`;
+    // Follow/Unfollow button
+    if (e.target.id === "followUserBtn") {
+      const isFollowing = e.target.textContent === "Unfollow";
+      const endpoint = `/api/users/${userId}/${
+        isFollowing ? "unfollow" : "follow"
+      }`;
 
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        credentials: "include",
-      });
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          credentials: "include",
+        });
 
-      if (!res.ok) throw new Error("Follow request failed");
+        if (!res.ok) throw new Error("Follow request failed");
 
-      e.target.textContent = isFollowing ? "Follow" : "Unfollow";
-      e.target.className = `btn ${isFollowing ? "btn-outline-success" : "btn-secondary"}`;
-    } catch (err) {
-      alert("Error: " + err.message);
+        e.target.textContent = isFollowing ? "Follow" : "Unfollow";
+        e.target.className = `btn ${
+          isFollowing ? "btn-outline-success" : "btn-secondary"
+        }`;
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
     }
-  }
-});
-
+  });
 });
