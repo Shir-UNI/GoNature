@@ -26,17 +26,26 @@ const getAllUsers = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
+    const updates = { ...req.body };
+
+    // If a new profile image was uploaded, override the image path
+    if (req.file) {
+      updates.profileImage = `/uploads/profiles/${req.file.filename}`;
+    }
+
     const updatedUser = await userService.updateUser(
       req.params.id,
-      req.body,
+      updates,
       req.session.userId
     );
+
     res.status(200).json(updatedUser);
   } catch (err) {
     const status = err.status || 500;
-    res
-      .status(status)
-      .json({ message: "Failed to update user", error: err.message });
+    res.status(status).json({
+      message: "Failed to update user",
+      error: err.message,
+    });
   }
 };
 

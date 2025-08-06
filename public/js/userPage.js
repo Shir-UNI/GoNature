@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (currentUser && currentUser._id === user._id) {
       actionButtons.innerHTML = `
-        <a href="/users/${user._id}/edit" class="btn btn-outline-primary me-2">Edit Profile</a>
+        <button class="btn btn-outline-primary me-2" id="editProfileBtn">Edit Profile</button>
         <button class="btn btn-outline-danger me-2" id="deleteUserBtn">Delete Account</button>
       `;
     } else {
@@ -126,4 +126,83 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   });
+
+  // Open edit profile modal
+document.addEventListener("click", (e) => {
+  if (e.target.id === "editProfileBtn") {
+    document.getElementById("editUsername").value = currentUser.username || "";
+    document.getElementById("editEmail").value = currentUser.email || "";
+    document.getElementById("editPassword").value = "";
+
+    const preview = document.getElementById("profileImagePreview");
+    preview.src = currentUser.profileImage;
+    preview.style.display = "block";
+
+    const modal = new bootstrap.Modal(
+      document.getElementById("editUserModal")
+    );
+    modal.show();
+  }
+});
+
+
+  // Handle edit profile form submit
+  const editForm = document.getElementById("editUserForm");
+  if (editForm) {
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertBox = document.getElementById("editUserAlert");
+      alertBox.classList.add("d-none");
+
+      const formData = new FormData();
+      const username = document.getElementById("editUsername").value.trim();
+      const email = document.getElementById("editEmail").value.trim();
+      const password = document.getElementById("editPassword").value.trim();
+      const profileImageFile =
+        document.getElementById("editProfileImage").files[0];
+
+      if (username) formData.append("username", username);
+      if (email) formData.append("email", email);
+      if (password) formData.append("password", password);
+      if (profileImageFile) formData.append("profileImage", profileImageFile);
+
+      try {
+        const res = await fetch(`/api/users/${currentUser._id}`, {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          alertBox.textContent = result.message || "Update failed.";
+          alertBox.classList.remove("d-none");
+          return;
+        }
+
+        location.reload();
+      } catch (err) {
+        alertBox.textContent = "An unexpected error occurred.";
+        alertBox.classList.remove("d-none");
+      }
+    });
+  }
+   // Preview profile picture
+  document.getElementById("editProfileImage").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const preview = document.getElementById("profileImagePreview");
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      preview.src = reader.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  } else {
+    preview.style.display = "none";
+  }
+});
+
 });
