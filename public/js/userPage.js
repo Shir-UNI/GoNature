@@ -31,13 +31,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (currentUser && currentUser._id === user._id) {
       actionButtons.innerHTML = `
-        <button class="btn btn-outline-primary me-2" id="editProfileBtn">Edit Profile</button>
-        <button class="btn btn-outline-danger me-2" id="deleteUserBtn">Delete Account</button>
-      `;
+    <button class="btn btn-outline-primary me-2" id="editProfileBtn">Edit Profile</button>
+    <button class="btn btn-outline-danger me-2" id="deleteUserBtn">Delete Account</button>
+  `;
     } else {
+      const isFollowing = currentUser?.following?.includes(user._id);
       actionButtons.innerHTML = `
-        <button class="btn btn-outline-success" id="followUserBtn">Follow</button>
-      `;
+    <button class="btn ${
+      isFollowing ? "btn-secondary" : "btn-outline-success"
+    }" id="followUserBtn">
+      ${isFollowing ? "Unfollow" : "Follow"}
+    </button>
+  `;
     }
   };
 
@@ -128,23 +133,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Open edit profile modal
-document.addEventListener("click", (e) => {
-  if (e.target.id === "editProfileBtn") {
-    document.getElementById("editUsername").value = currentUser.username || "";
-    document.getElementById("editEmail").value = currentUser.email || "";
-    document.getElementById("editPassword").value = "";
+  document.addEventListener("click", (e) => {
+    if (e.target.id === "editProfileBtn") {
+      document.getElementById("editUsername").value =
+        currentUser.username || "";
+      document.getElementById("editEmail").value = currentUser.email || "";
+      document.getElementById("editPassword").value = "";
 
-    const preview = document.getElementById("profileImagePreview");
-    preview.src = currentUser.profileImage;
-    preview.style.display = "block";
+      const preview = document.getElementById("profileImagePreview");
+      preview.src = currentUser.profileImage;
+      preview.style.display = "block";
 
-    const modal = new bootstrap.Modal(
-      document.getElementById("editUserModal")
-    );
-    modal.show();
-  }
-});
-
+      const modal = new bootstrap.Modal(
+        document.getElementById("editUserModal")
+      );
+      modal.show();
+    }
+  });
 
   // Handle edit profile form submit
   const editForm = document.getElementById("editUserForm");
@@ -188,21 +193,49 @@ document.addEventListener("click", (e) => {
       }
     });
   }
-   // Preview profile picture
-  document.getElementById("editProfileImage").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  const preview = document.getElementById("profileImagePreview");
+  // Preview profile picture
+  document
+    .getElementById("editProfileImage")
+    .addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      const preview = document.getElementById("profileImagePreview");
 
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      preview.src = reader.result;
-      preview.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  } else {
-    preview.style.display = "none";
-  }
-});
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          preview.src = reader.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = "none";
+      }
+    });
 
+    //Handle follow/unfollow button
+  document.addEventListener("click", async (e) => {
+    if (e.target.id === "followUserBtn") {
+      const isFollowing = e.target.textContent === "Unfollow";
+      const endpoint = `/api/users/${userId}/${
+        isFollowing ? "unfollow" : "follow"
+      }`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Follow request failed");
+
+        // Toggle button UI
+        e.target.textContent = isFollowing ? "Follow" : "Unfollow";
+        e.target.className = `btn ${
+          isFollowing ? "btn-outline-success" : "btn-secondary"
+        }`;
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+  });
 });
