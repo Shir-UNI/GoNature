@@ -52,7 +52,19 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     await userService.deleteUser(req.params.id, req.session.userId);
-    res.status(200).json({ message: "User deleted successfully" });
+
+    // Destroy session after user deletion
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Failed to destroy session after user deletion:", err);
+        return res
+          .status(500)
+          .json({ message: "User deleted but failed to end session" });
+      }
+
+      res.clearCookie("connect.sid"); // Optional: clear session cookie
+      res.status(200).json({ message: "User deleted successfully" });
+    });
   } catch (err) {
     const status = err.status || 500;
     res
