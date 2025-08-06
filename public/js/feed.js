@@ -13,13 +13,12 @@ function showAlert(message, type = "danger") {
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   `;
-   if (timeout) {
+  if (timeout) {
     setTimeout(() => {
       container.innerHTML = "";
     }, timeout);
   }
 }
-
 
 document.addEventListener("DOMContentLoaded", async () => {
   const postsContainer = document.getElementById("posts-container");
@@ -41,10 +40,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Add clear (X) button handler for date filter
-  document.getElementById("clearDateFilterBtn")?.addEventListener("click", () => {
-  document.getElementById("filterDateRange")._flatpickr.clear();
-  runDynamicFilter();
-  });
+  document
+    .getElementById("clearDateFilterBtn")
+    ?.addEventListener("click", () => {
+      document.getElementById("filterDateRange")._flatpickr.clear();
+      runDynamicFilter();
+    });
 
   // Load user's groups and populate both dropdowns (post creation & filter)
   const loadUserGroups = async () => {
@@ -62,7 +63,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const postGroupSelect = document.getElementById("postGroup");
     const filterGroupSelect = document.getElementById("filterGroup");
 
-    postGroupSelect.innerHTML = "<option selected disabled>-- Select a group --</option>";
+    postGroupSelect.innerHTML =
+      "<option selected disabled>-- Select a group --</option>";
     filterGroupSelect.innerHTML = '<option value="">All Groups</option>';
 
     groups.forEach((group) => {
@@ -90,7 +92,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const displayPosts = (posts) => {
     postsContainer.innerHTML = "";
     if (posts.length === 0) {
-      postsContainer.innerHTML = '<p class="text-center">No posts to display.</p>';
+      postsContainer.innerHTML =
+        '<p class="text-center">No posts to display.</p>';
       return;
     }
 
@@ -100,14 +103,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       card.innerHTML = `
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
-            <img src="${post.user.profileImage}" class="rounded-circle me-2" width="40" height="40" alt="${post.user.username}'s profile">
+            <img src="${
+              post.user.profileImage
+            }" class="rounded-circle me-2" width="40" height="40" alt="${
+              post.user.username
+            }'s profile">
             <div>
               <strong>${post.user.username}</strong><br/>
-              <small class="text-muted">in ${post.group.name} • ${new Date(post.createdAt).toLocaleString()}</small>
+              <small class="text-muted">in ${post.group.name} • ${new Date(
+              post.createdAt
+            ).toLocaleString()}</small>
             </div>
           </div>
           <p>${post.content}</p>
-          ${post.media ? `<img src="${post.media}" class="img-fluid mt-2 rounded" alt="Post media">` : ""}
+          ${renderMedia(post)}
         </div>
       `;
       postsContainer.appendChild(card);
@@ -116,7 +125,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Filter posts dynamically on input/change
   const runDynamicFilter = () => {
-    const username = document.getElementById("filterUsername").value.trim().toLowerCase();
+    const username = document
+      .getElementById("filterUsername")
+      .value.trim()
+      .toLowerCase();
     const groupId = document.getElementById("filterGroup").value;
     const dateRangeValue = document.getElementById("filterDateRange").value;
 
@@ -134,10 +146,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     const filtered = allPosts.filter((post) => {
-      const matchesUser = username ? post.user.username.toLowerCase().includes(username) : true;
+      const matchesUser = username
+        ? post.user.username.toLowerCase().includes(username)
+        : true;
       const matchesGroup = groupId ? post.group._id === groupId : true;
       const postDate = new Date(post.createdAt);
-      const matchesDate = (!startDate || postDate >= startDate) && (!endDate || postDate <= endDate);
+      const matchesDate =
+        (!startDate || postDate >= startDate) &&
+        (!endDate || postDate <= endDate);
       return matchesUser && matchesGroup && matchesDate;
     });
 
@@ -145,9 +161,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // Bind dynamic filter events
-  document.getElementById("filterUsername")?.addEventListener("input", runDynamicFilter);
-  document.getElementById("filterGroup")?.addEventListener("change", runDynamicFilter);
-  document.getElementById("filterDateRange")?.addEventListener("change", runDynamicFilter);
+  document
+    .getElementById("filterUsername")
+    ?.addEventListener("input", runDynamicFilter);
+  document
+    .getElementById("filterGroup")
+    ?.addEventListener("change", runDynamicFilter);
+  document
+    .getElementById("filterDateRange")
+    ?.addEventListener("change", runDynamicFilter);
 
   // Submit a new post
   const handlePostSubmit = async (e) => {
@@ -215,13 +237,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadPosts();
   };
 
-const getMediaType = (file) => {
-  const type = file.type;
-  if (type.startsWith("image/")) return "image";
-  if (type.startsWith("video/")) return "video";
-  return "unknown";
-};
+  const getMediaType = (file) => {
+    const type = file.type;
+    if (type.startsWith("image/")) return "image";
+    if (type.startsWith("video/")) return "video";
+    return "unknown";
+  };
 
+  function renderMedia(post) {
+    if (!post.media) return "";
+
+    if (post.type === "image") {
+      return `<img src="${post.media}" class="img-fluid mt-2 rounded" alt="Post image">`;
+    }
+
+    if (post.type === "video") {
+      return `
+        <video controls class="img-fluid mt-2 rounded" style="max-height: 300px;">
+          <source src="${post.media}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      `;
+    }
+
+    return "";
+  }
 
   // Image upload preview
   const mediaInput = document.getElementById("newPostMedia");
@@ -234,21 +274,46 @@ const getMediaType = (file) => {
 
   mediaInput?.addEventListener("change", () => {
     const file = mediaInput.files[0];
+    const previewImage = document.getElementById("previewImage");
+    const previewVideo = document.getElementById("previewVideo");
+    const previewContainer = document.getElementById("mediaPreview");
+
     if (file) {
       fileNameSpan.textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        previewImage.src = e.target.result;
+      const type = getMediaType(file);
+
+      if (type === "image") {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImage.src = e.target.result;
+          previewImage.style.display = "block";
+          previewVideo.style.display = "none";
+          previewContainer.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else if (type === "video") {
+        const videoURL = URL.createObjectURL(file);
+        previewVideo.src = videoURL;
+        previewVideo.style.display = "block";
+        previewImage.style.display = "none";
         previewContainer.style.display = "block";
-      };
-      reader.readAsDataURL(file);
+      } else {
+        previewContainer.style.display = "none";
+        previewImage.style.display = "none";
+        previewVideo.style.display = "none";
+        fileNameSpan.textContent = "Unsupported file";
+      }
     } else {
       fileNameSpan.textContent = "No file selected";
       previewContainer.style.display = "none";
+      previewImage.style.display = "none";
+      previewVideo.style.display = "none";
     }
   });
 
-  document.getElementById("postSubmitBtn")?.addEventListener("click", handlePostSubmit);
+  document
+    .getElementById("postSubmitBtn")
+    ?.addEventListener("click", handlePostSubmit);
 
   try {
     await loadUser();
@@ -256,6 +321,7 @@ const getMediaType = (file) => {
     await loadPosts();
   } catch (err) {
     console.error("Error loading feed:", err.message);
-    postsContainer.innerHTML = '<div class="alert alert-danger">Error loading feed.</div>';
+    postsContainer.innerHTML =
+      '<div class="alert alert-danger">Error loading feed.</div>';
   }
 });
