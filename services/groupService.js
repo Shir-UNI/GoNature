@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Group = require("../models/Group");
 const User = require("../models/User");
+const Post = require('../models/Post');
 
 // Create a new group with the current user as admin and first member
 const createGroup = async ({ name, description, admin }) => {
@@ -182,6 +183,32 @@ const getGroupsByUserId = async (userId) => {
   return await Group.find({ members: userId }); // assuming "members" is an array of user IDs
 };
 
+async function getGroupStats(groupId) {
+  return await Post.aggregate([
+    { $match: { group: new mongoose.Types.ObjectId(groupId) } },
+    { $group: { _id: '$user', count: { $sum: 1 } } },
+    {
+      $lookup: {
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'userInfo'
+      }
+    },
+    { $unwind: '$userInfo' },
+    {
+      $project: {
+        _id: 0,
+        userId: '$userInfo._id',
+        username: '$userInfo.username',
+        profileImage: '$userInfo.profileImage',
+        count: 1
+      }
+    },
+    { $sort: { count: -1 } }
+  ]);
+}
+
 module.exports = {
   createGroup,
   getGroupById,
@@ -190,5 +217,6 @@ module.exports = {
   addMemberToGroup,
   removeMemberFromGroup,
   deleteGroup,
-  getGroupsByUserId
+  getGroupsByUserId,
+  getGroupStats,
 };

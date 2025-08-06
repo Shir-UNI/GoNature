@@ -1,6 +1,6 @@
 const groupService = require("../services/groupService");
-const Group = require('../models/Group');
-const mongoose = require('mongoose');
+const Group = require("../models/Group");
+const mongoose = require("mongoose");
 
 const createGroup = async (req, res) => {
   try {
@@ -130,14 +130,35 @@ const getGroupsByCurrentUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    const groups = await Group.find({ members: new mongoose.Types.ObjectId(userId) });
+    const groups = await Group.find({
+      members: new mongoose.Types.ObjectId(userId),
+    });
 
     res.status(200).json(groups);
   } catch (err) {
     console.error(err);
-    res.status(400).json({ message: 'Failed to load user groups' });
+    res.status(400).json({ message: "Failed to load user groups" });
   }
 };
+
+async function stats(req, res) {
+  const { id: groupId } = req.params;
+  // check objectID
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json({ message: 'Invalid group ID' });
+  }
+
+  try {
+    // call getGroupStats
+    const stats = await groupService.getGroupStats(groupId);
+    return res.status(200).json(stats);
+  } catch (err) {
+    console.error('Error fetching group stats:', err);
+    return res
+      .status(err.status || 500)
+      .json({ message: err.message || 'Server error fetching stats' });
+  }
+}
 
 module.exports = {
   createGroup,
@@ -148,4 +169,5 @@ module.exports = {
   addMember,
   removeMember,
   getGroupsByCurrentUser,
+  stats,
 };
