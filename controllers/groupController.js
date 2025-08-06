@@ -1,4 +1,6 @@
 const groupService = require("../services/groupService");
+const Group = require('../models/Group');
+const mongoose = require('mongoose');
 
 const createGroup = async (req, res) => {
   try {
@@ -120,6 +122,23 @@ const removeMember = async (req, res) => {
   }
 };
 
+const getGroupsByCurrentUser = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const groups = await Group.find({ members: new mongoose.Types.ObjectId(userId) });
+
+    res.status(200).json(groups);
+  } catch (err) {
+    console.error(err);
+    res.status(400).json({ message: 'Failed to load user groups' });
+  }
+};
+
 module.exports = {
   createGroup,
   getGroupById,
@@ -128,4 +147,5 @@ module.exports = {
   deleteGroup,
   addMember,
   removeMember,
+  getGroupsByCurrentUser,
 };

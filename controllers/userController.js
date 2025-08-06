@@ -52,9 +52,23 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Get currently logged-in user
+const getCurrentUser = async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(400).json({ message: "User ID is missing from session" });
+  }
+  try {
+    const user = await userService.getUserById(req.session.userId);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getUserById,
   getAllUsers,
   updateUser,
   deleteUser,
+  getCurrentUser,
 };

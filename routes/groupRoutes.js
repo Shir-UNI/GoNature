@@ -13,6 +13,9 @@ router.post('/', isAuthenticated, validateCreateGroup, groupController.createGro
 // Get all groups
 router.get('/', isAuthenticated, groupController.getAllGroups);
 
+// Gets group by UserID
+router.get('/my-groups', isAuthenticated, groupController.getGroupsByCurrentUser);
+
 // Get a specific group by ID
 router.get('/:id', isAuthenticated, validateObjectId('id', 'group ID'), groupController.getGroupById);
 
@@ -27,5 +30,6 @@ router.post('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'),
 
 // Remove a member from group
 router.delete('/:id/members', isAuthenticated, validateObjectId('id', 'group ID'), groupController.removeMember);
+
 
 module.exports = router;

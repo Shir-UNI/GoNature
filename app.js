@@ -12,6 +12,8 @@ const groupRoutes = require('./routes/groupRoutes');
 const authRoutes = require('./routes/authRoutes');
 const feedRoutes = require('./routes/feedRoutes');
 const pageRoutes = require('./routes/pageRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+const weatherRoutes = require("./routes/weatherRoutes");
 
 
 require('custom-env').env(process.env.NODE_ENV, './config');
@@ -23,15 +25,21 @@ connectDB();
 
 // Middleware
 app.use(bodyParser.urlencoded({extended : true}));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'defaultSecret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 // 1 day
+  }
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
+app.use('/uploads', express.static('public/uploads'));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true
-}));
+app.locals.googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
 
 
 // View engine setup
@@ -45,6 +53,8 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/search', searchRoutes);
+app.use("/api/weather", weatherRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

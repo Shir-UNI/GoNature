@@ -5,10 +5,10 @@ const postController = require('../controllers/postController');
 const { validateCreatePost, validateUpdatePost } = require('../middleware/postValidator');
 const { isAuthenticated } = require('../middleware/authMiddleware'); 
 const validateObjectId = require('../middleware/objectIdValidator');
-
+const { uploadPostMedia, attachMediaUrl } = require('../middleware/uploadMiddleware')
 
 // Create a new post
-router.post('/', isAuthenticated, validateCreatePost, postController.createPost);
+router.post('/', uploadPostMedia.single('media'), attachMediaUrl, isAuthenticated, validateCreatePost, postController.createPost);
 
 // Get all posts
 router.get('/', isAuthenticated, postController.getAllPosts);

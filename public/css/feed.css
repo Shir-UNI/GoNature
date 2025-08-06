@@ -1,0 +1,68 @@
+body {
+  background-color: #f4f6f9;
+}
+
+#feedContainer .card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+#username {
+  font-weight: 500;
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+}
+
+.card img.img-fluid {
+  max-height: 400px;
+  object-fit: cover;
+  margin-top: 1rem;
+}
+
+#posts-Container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.navbar-brand {
+  font-family: 'Segoe UI', sans-serif;
+}
+
+#userProfileImage {
+  border: 2px solid #ccc;
+}
+
+/* Limit width of the create post section */
+#create-post-card {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Add spacing above the posts container */
+#posts-container {
+  margin-top: 20px;
+}
+
+.clear-date-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0;
+  color: #888;
+  cursor: pointer;
+}
+
+.clear-date-btn:hover {
+  color: #000;
+}
