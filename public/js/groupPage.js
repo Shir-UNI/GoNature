@@ -16,6 +16,28 @@ import { getPostsByGroup, renderGroupPosts }        from './groupPagePosts.js';
 import { initGroupMap }                             from './groupPageMap.js';
 import { loadGroupStats, renderContributorBarChart }from './chartUtils.js';
 
+let allPosts = [];    // נשמור פה את כל הפוסטים המקוריים
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const groupId = window.groupId;
+
+  // … Navbar, Sidebar, Posts loading כמו קודם …
+
+  // 2. Posts  
+  allPosts = await getPostsByGroup(groupId);
+  renderGroupPosts(allPosts);
+
+  // 3. Map  
+  initGroupMap(allPosts);
+
+  // 4. Stats  
+  const stats = await loadGroupStats(groupId);
+  renderContributorBarChart(stats, 'groupActivityChart');
+
+  // 5. Setup Filters UI  
+  setupFilters(allPosts);
+});
+
 // Utility to update Navbar based on currentUser
 function updateNavbar() {
   const loginBtn = document.getElementById('loginBtn');
@@ -37,6 +59,51 @@ function updateNavbar() {
     if (usernameDisplay) usernameDisplay.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'none';
   }
+}
+
+//setup filter
+function setupFilters(posts) {
+  const authorSelect = document.getElementById('filterAuthor');
+  const dateFrom     = document.getElementById('filterDateFrom');
+  const dateTo       = document.getElementById('filterDateTo');
+  const typeSelect   = document.getElementById('filterType');
+  const applyBtn     = document.getElementById('applyFilters');
+
+  // Fill authors dropdown
+  const authors = Array.from(new Set(posts.map(p => p.user.username)));
+  authors.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    authorSelect.appendChild(opt);
+  });
+
+  applyBtn.addEventListener('click', () => {
+    // Gather filter values
+    const author   = authorSelect.value;
+    const fromDate = dateFrom.value ? new Date(dateFrom.value) : null;
+    const toDate   = dateTo.value   ? new Date(dateTo.value)   : null;
+    const type     = typeSelect.value;
+
+    // Filter logic
+    const filtered = posts.filter(p => {
+      // by author
+      if (author && p.user.username !== author) return false;
+      // by date
+      const created = new Date(p.createdAt);
+      if (fromDate && created < fromDate) return false;
+      if (toDate   && created > toDate)   return false;
+      // by media type
+      if (type === 'image' && p.type !== 'image')   return false;
+      if (type === 'video' && p.type !== 'video')   return false;
+      if (type === 'none'  && p.media)               return false;
+      return true;
+    });
+
+    // Re-render posts + map
+    renderGroupPosts(filtered);
+    initGroupMap(filtered);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

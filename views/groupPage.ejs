@@ -23,6 +23,33 @@
           <div id="group-actions" class="mb-3">
             <!-- Filled by JS: Join/Leave or Edit/Manage -->
           </div>
+
+          <!-- Filter Bar -->
+          <div id="postFilters" class="card mb-4 p-3">
+            <h6>Filter Posts</h6>
+            <div class="mb-2">
+              <label for="filterAuthor" class="form-label">Author</label>
+              <select id="filterAuthor" class="form-select">
+                <option value="">All</option>
+                <!-- JS ימלא אופציות של שם משתמשים -->
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Date Range</label>
+              <input type="date" id="filterDateFrom" class="form-control mb-1" />
+              <input type="date" id="filterDateTo" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <label for="filterType" class="form-label">Media Type</label>
+              <select id="filterType" class="form-select">
+                <option value="">All</option>
+                <option value="image">Image</option>
+                <option value="video">Video</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+            <button id="applyFilters" class="btn btn-sm btn-primary w-100">Apply</button>
+          </div>
           <div class="mt-4">
             <h6>Top Contributors</h6>
             <div id="groupActivityChart" class="d3-chart"></div>
