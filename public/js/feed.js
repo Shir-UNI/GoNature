@@ -151,51 +151,51 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Display given array of posts in the DOM
   const displayPosts = (posts) => {
-    postsContainer.innerHTML = "";
-    if (posts.length === 0) {
-      postsContainer.innerHTML =
-        '<p class="text-center">No posts to display.</p>';
-      return;
-    }
+  const postsContainer = document.getElementById("posts-container");
+  postsContainer.innerHTML = "";
 
-    posts.forEach((post) => {
-      const card = document.createElement("div");
-      card.className = "card mb-3 shadow-sm";
-      card.innerHTML = `
-        <div class="card-body">
-          <div class="d-flex align-items-center mb-2">
-            <img src="${
-              post.user.profileImage
-            }" class="rounded-circle me-2" width="40" height="40" alt="${
-        post.user.username
-      }'s profile">
-            <div>
-              <strong>${post.user.username}</strong><br/>
-              <small class="text-muted">in ${post.group.name} • ${new Date(
-        post.createdAt
-      ).toLocaleString()}</small>
-            </div>
+  if (posts.length === 0) {
+    postsContainer.innerHTML =
+      '<p class="text-center">No posts to display.</p>';
+    return;
+  }
+
+  posts.forEach((post) => {
+    const card = document.createElement("div");
+    card.className = "card mb-3 shadow-sm";
+
+    const sourceLabel = post.group
+      ? `in ${post.group.name}`
+      : `from followed user`;
+
+    card.innerHTML = `
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-2">
+          <img src="${post.user.profileImage}" class="rounded-circle me-2" width="40" height="40" alt="${post.user.username}'s profile">
+          <div>
+            <strong>${post.user.username}</strong><br/>
+            <small class="text-muted">${sourceLabel} • ${new Date(post.createdAt).toLocaleString()}</small>
           </div>
-          <p>${post.content}</p>
-          ${renderMedia(post)}
-          <div class="weather-info text-muted small mt-2" id="weather-${
-            post._id
-          }">Loading weather...</div>
         </div>
-      `;
+        <p>${post.content}</p>
+        ${renderMedia(post)}
+        <div class="weather-info text-muted small mt-2" id="weather-${post._id}">Loading weather...</div>
+      </div>
+    `;
 
-      postsContainer.appendChild(card);
+    postsContainer.appendChild(card);
 
-      // Fetch and display weather if location exists
-      if (post.location?.coordinates?.length === 2) {
-        const [lng, lat] = post.location.coordinates;
-        fetchWeatherForPost(post._id, lat, lng);
-      } else {
-        const weatherEl = document.getElementById(`weather-${post._id}`);
-        if (weatherEl) weatherEl.textContent = "No location data.";
-      }
-    });
-  };
+    // Fetch and display weather if location exists
+    if (post.location?.coordinates?.length === 2) {
+      const [lng, lat] = post.location.coordinates;
+      fetchWeatherForPost(post._id, lat, lng);
+    } else {
+      const weatherEl = document.getElementById(`weather-${post._id}`);
+      if (weatherEl) weatherEl.textContent = "No location data.";
+    }
+  });
+};
+
 
   // Filter posts dynamically on input/change
   const runDynamicFilter = () => {
