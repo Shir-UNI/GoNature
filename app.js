@@ -12,6 +12,7 @@ const groupRoutes = require('./routes/groupRoutes');
 const authRoutes = require('./routes/authRoutes');
 const feedRoutes = require('./routes/feedRoutes');
 const pageRoutes = require('./routes/pageRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 
 require('custom-env').env(process.env.NODE_ENV, './config');
@@ -51,6 +52,7 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/search', searchRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3000;
