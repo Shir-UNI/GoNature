@@ -1,0 +1,31 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom px-4">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <a class="navbar-brand fw-bold text-success fs-4" href="/feed">GoNature 🌿</a>
+
+    <div class="d-flex align-items-center position-relative">
+      <!-- Search bar -->
+      <div class="me-3 position-relative" style="min-width: 250px;">
+        <input
+          class="form-control"
+          type="search"
+          placeholder="Search users or groups"
+          id="searchQuery"
+          aria-label="Search"
+        />
+        <ul
+          id="navSearchResults"
+          class="list-group position-absolute top-100 start-0 w-100 shadow-sm z-3"
+          style="max-height: 200px; overflow-y: auto;"
+        ></ul>
+      </div>
+
+      <!-- Profile + Logout -->
+      <a id="profileLink" href="#">
+        <img id="userProfileImage" src="/images/profile-default.png"
+          class="rounded-circle me-2 border" width="40" height="40" alt="Profile" />
+      </a>
+      <span id="usernameDisplay" class="fw-semibold me-3"></span>
+      <a href="/api/auth/logout" class="btn btn-outline-success btn-sm">Logout</a>
+    </div>
+  </div>
+</nav>
