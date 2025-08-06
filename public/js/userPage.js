@@ -31,22 +31,50 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (currentUser && currentUser._id === user._id) {
       actionButtons.innerHTML = `
-    <button class="btn btn-outline-primary me-2" id="editProfileBtn">Edit Profile</button>
-    <button class="btn btn-outline-danger me-2" id="deleteUserBtn">Delete Account</button>
-  `;
+        <button class="btn btn-outline-primary me-2" id="editProfileBtn">Edit Profile</button>
+        <button class="btn btn-outline-danger me-2" id="deleteUserBtn">Delete Account</button>
+      `;
     } else {
       const isFollowing = currentUser?.following?.includes(user._id);
       actionButtons.innerHTML = `
-    <button class="btn ${
-      isFollowing ? "btn-secondary" : "btn-outline-success"
-    }" id="followUserBtn">
-      ${isFollowing ? "Unfollow" : "Follow"}
-    </button>
-  `;
+        <button class="btn ${
+          isFollowing ? "btn-secondary" : "btn-outline-success"
+        }" id="followUserBtn">
+          ${isFollowing ? "Unfollow" : "Follow"}
+        </button>
+      `;
     }
   };
 
-  // Fetch user posts and render
+  const renderFollowedUsers = async () => {
+    const res = await fetch(`/api/users/${userId}`, {
+      credentials: "include",
+    });
+
+    if (!res.ok) return;
+
+    const user = await res.json();
+    const followedUsers = user.following;
+    if (!Array.isArray(followedUsers) || followedUsers.length === 0) return;
+
+    const list = document.getElementById("followingList");
+    list.innerHTML = ""; // clear previous
+
+    followedUsers.forEach((u) => {
+      const row = document.createElement("div");
+      row.className = "d-flex align-items-center gap-2";
+
+      row.innerHTML = `
+      <a href="/users/${u._id}" class="d-flex align-items-center text-decoration-none text-dark">
+        <img src="${u.profileImage}" class="rounded-circle" width="32" height="32" alt="${u.username}" />
+        <span>${u.username}</span>
+      </a>
+    `;
+
+      list.appendChild(row);
+    });
+  };
+
   const loadUserPosts = async () => {
     const res = await fetch(`/api/posts/user/${userId}`, {
       credentials: "include",
@@ -101,7 +129,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     return "";
   };
 
-  // Initial load
   try {
     await loadCurrentUser();
     await loadUserProfile();
@@ -111,7 +138,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     postsContainer.innerHTML = `<div class="alert alert-danger">Error loading page.</div>`;
   }
 
-  // Bind delete button
   document.addEventListener("click", async (e) => {
     if (e.target.id === "deleteUserBtn") {
       const confirmed = confirm(
@@ -132,7 +158,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Open edit profile modal
   document.addEventListener("click", (e) => {
     if (e.target.id === "editProfileBtn") {
       document.getElementById("editUsername").value =
@@ -151,7 +176,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Handle edit profile form submit
   const editForm = document.getElementById("editUserForm");
   if (editForm) {
     editForm.addEventListener("submit", async (e) => {
@@ -193,7 +217,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
   }
-  // Preview profile picture
+
   document
     .getElementById("editProfileImage")
     .addEventListener("change", (e) => {
@@ -212,30 +236,36 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    //Handle follow/unfollow button
   document.addEventListener("click", async (e) => {
-    if (e.target.id === "followUserBtn") {
-      const isFollowing = e.target.textContent === "Unfollow";
-      const endpoint = `/api/users/${userId}/${
-        isFollowing ? "unfollow" : "follow"
-      }`;
+  if (e.target.id === "toggleFollowingBtn") {
+    const target = document.getElementById("followingCollapse");
+    const alreadyLoaded = target.getAttribute("data-loaded");
 
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          credentials: "include",
-        });
-
-        if (!res.ok) throw new Error("Follow request failed");
-
-        // Toggle button UI
-        e.target.textContent = isFollowing ? "Follow" : "Unfollow";
-        e.target.className = `btn ${
-          isFollowing ? "btn-outline-success" : "btn-secondary"
-        }`;
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
+    if (!alreadyLoaded) {
+      await renderFollowedUsers();
+      target.setAttribute("data-loaded", "true"); // avoid multiple fetches
     }
-  });
+  }
+
+  // Follow/Unfollow button
+  if (e.target.id === "followUserBtn") {
+    const isFollowing = e.target.textContent === "Unfollow";
+    const endpoint = `/api/users/${userId}/${isFollowing ? "unfollow" : "follow"}`;
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error("Follow request failed");
+
+      e.target.textContent = isFollowing ? "Follow" : "Unfollow";
+      e.target.className = `btn ${isFollowing ? "btn-outline-success" : "btn-secondary"}`;
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
+});
+
 });
