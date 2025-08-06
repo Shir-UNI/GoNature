@@ -25,4 +25,8 @@ router.delete('/:id', validateObjectId('id', 'post ID'), isAuthenticated, postCo
 //Get posts by user ID
 router.get("/user/:userId", postController.getPostsByUser);
 
+//Get monthly aggregation of posts by user
+router.get("/stats/monthly/:userId", postController.getMonthlyPostStats);
+
+
 module.exports = router;
