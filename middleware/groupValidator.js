@@ -4,9 +4,17 @@ const validateCreateGroup = (req, res, next) => {
   if (!name || typeof name !== 'string' || !name.trim()) {
     return res.status(400).json({ message: 'Group name is required and must be a non-empty string' });
   }
-
+  
   if (description && typeof description !== 'string') {
     return res.status(400).json({ message: 'Description must be a string' });
+  }
+
+  // Validate only letters and spaces (Unicode letters supported)
+  const trimmedname = name.trim();
+  if (!/^[\p{L}\s]+$/u.test(trimmedname)) {
+    return res
+      .status(400)
+      .json({ message: "Group name can only contain letters and spaces" });
   }
 
   next();
@@ -29,6 +37,14 @@ const validateUpdateGroup = (req, res, next) => {
 
   if (members !== undefined && !Array.isArray(members)) {
     return res.status(400).json({ message: 'Members must be an array of user IDs' });
+  }
+
+  // Validate only letters and spaces (Unicode letters supported)
+  const trimmedname = name.trim();
+  if (!/^[\p{L}\s]+$/u.test(trimmedname)) {
+    return res
+      .status(400)
+      .json({ message: "Group name can only contain letters and spaces" });
   }
 
   next();
