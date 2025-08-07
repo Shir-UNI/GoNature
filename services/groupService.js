@@ -5,12 +5,26 @@ const Post = require('../models/Post');
 
 // Create a new group with the current user as admin and first member
 const createGroup = async ({ name, description, admin }) => {
+  // 1. Normalize & trim
+  const trimmedName = name.trim();
+  const trimmedDesc = description?.trim();
+
+  // 2. Check for duplicate
+  const existing = await Group.findOne({ name: trimmedName });
+  if (existing) {
+    const err = new Error('A group with that name already exists');
+    err.status = 400;     // so your error‐handler can send a 400 Bad Request
+    throw err;
+  }
+
+  // 3. Create & save
   const group = new Group({
-    name: name.trim(),
-    description: description?.trim(),
+    name: trimmedName,
+    description: trimmedDesc,
     admin,
-    members: [admin], // Add creator as first member
+    members: [admin],
   });
+
   return await group.save();
 };
 

@@ -11,9 +11,13 @@ const createGroup = async (req, res) => {
     });
     res.status(201).json(group);
   } catch (error) {
-    res
-      .status(error.status || 400)
-      .json({ message: "Failed to create group", error: error.message });
+    if (error.status === 400) {
+      return res.status(400).json({ message: error.message });
+    }
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Failed to create group" });
   }
 };
 

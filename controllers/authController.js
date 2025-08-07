@@ -3,7 +3,7 @@ const authService = require('../services/authService');
 const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    const profileImage = req.file ? `/uploads/profiles/${req.file.filename}` : '/public/images/profile-default.png';
+    const profileImage = req.file ? `/uploads/profiles/${req.file.filename}` : '/images/profile-default.png';
     
     await authService.registerUser({ username, email, password, profileImage });
     res.status(201).json({ message: 'User registered successfully' });

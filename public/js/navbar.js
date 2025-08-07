@@ -48,16 +48,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-// Fetch matching users and groups
+// Fetch matching users and groups based on search query
 async function fetchSearchResults(query) {
   try {
+    // Send request to search endpoint with session credentials
     const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
       credentials: "include",
     });
     if (!res.ok) throw new Error("Search failed");
+
+    // Parse JSON response
     const data = await res.json();
+    
+    // Filter out soft-deleted users
+    if (Array.isArray(data.users)) {
+      data.groups = data.groups.filter(group => !group.isDeleted);
+    }
+
+    // Filter out soft-deleted groups
+    if (Array.isArray(data.groups)) {
+      data.groups = data.groups.filter(group => !group.isDeleted);
+    }
+
+    // Display the filtered results in the dropdown
     displaySearchDropdown(data);
   } catch (err) {
+    // Log any errors that occur during fetch or processing
     console.error("Search error:", err.message);
   }
 }
