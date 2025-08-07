@@ -12,7 +12,7 @@
 - Create posts with text, images, or video
 - Join and manage travel groups
 - Interactive maps (Google Maps API)
-- Dynamic graphs with D3.js
+- Graphs with D3.js
 - Weather API integration
 - Full access control (edit/delete only your own posts)
 - Asynchronous API with AJAX (no page reloads)
@@ -23,8 +23,8 @@
 | Client Side        | Server Side         | Database     | Other              |
 |--------------------|----------------------|--------------|--------------------|
 | HTML5, CSS3        | Node.js + Express    | MongoDB      | Bootstrap, EJS     |
-| JavaScript (AJAX)  | MVC Architecture     | Mongoose     | dotenv, bcrypt     |
-|                    | RESTful API          |              | D3.js, Maps API    |
+| JavaScript (AJAX)  | MVC Architecture     | Mongoose     | bcrypt             |
+|                    |                      |              | D3.js, Maps API    |
 
 ---
 
@@ -40,7 +40,7 @@ GoNature/
 ├── services/
 ├── config/
 ├── middleware/
-├── server.js
+├── app.js
 ├── .env
 └── package.json
 ```
@@ -65,6 +65,8 @@ npm install
 PORT=3000
 MONGO_URI=mongodb://localhost:27017/gonature
 SESSION_SECRET=yourSecretKey
+GOOGLE_MAPS_API_KEY=yourgooglekey
+WEATHER_API_KEY=yourweatherkey
 ```
 
 4. Start the server:
