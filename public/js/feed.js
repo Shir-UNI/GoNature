@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error(err);
     }
   }
-
+ 
   // Display given array of posts in the DOM
   const displayPosts = (posts) => {
   const postsContainer = document.getElementById("posts-container");
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hasContent = content !== "";
     const hasMedia = !!mediaFile;
 
-    if (!groupId) {
+    if (groupId === '-- Select a group --') {
       showAlert("Please select a group", "danger");
       return;
     }
