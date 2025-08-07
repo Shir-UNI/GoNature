@@ -23,6 +23,3 @@ coverage/
 
 #test
 test/
-
-#uploads
-public/uploads/
