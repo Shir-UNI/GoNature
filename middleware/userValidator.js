@@ -9,13 +9,14 @@ const validateRegistration = (req, res, next) => {
       .status(400)
       .json({ message: "Username is required and must be a string" });
   }
+   const trimmedUsername = username.trim();
   if (username.trim().length < 3 || username.trim().length > 20) {
     return res
       .status(400)
       .json({ message: "Username must be between 3 and 20 characters" });
   }
   // Validate only letters and spaces (Unicode letters supported)
-  if (!/^[\p{L}\s]+$/u.test(trimmed)) {
+  if (!/^[\p{L}\s]+$/u.test(trimmedUsername)) {
     return res
       .status(400)
       .json({ message: "Username can only contain letters and spaces" });
