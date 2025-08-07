@@ -161,6 +161,20 @@ const aggregatePostsPerMonth = async (userId, fromDate) => {
   ]);
 };
 
+const getPostsByGroup = async (groupId) => {
+  try {
+    const posts = await Post.find({ group: groupId })
+      .populate('user', 'username profileImage')
+      .sort({ createdAt: -1 })
+      .exec();
+    return posts;
+  } catch (err) {
+    const error = new Error('Failed to fetch posts by group');
+    error.status = 500;
+    throw error;
+  }
+};
+
 
 module.exports = {
   createPost,
@@ -170,4 +184,5 @@ module.exports = {
   deletePost,
   getPostsByUser,
   aggregatePostsPerMonth,
+  getPostsByGroup,
 };

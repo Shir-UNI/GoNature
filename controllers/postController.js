@@ -1,4 +1,5 @@
 const postService = require("../services/postService");
+const Post = require('../models/Post');
 const mongoose = require("mongoose");
 
 const createPost = async (req, res) => {
@@ -110,6 +111,23 @@ const getMonthlyPostStats = async (req, res) => {
   }
 };
 
+const getPostsByGroup = async (req, res) => {
+  const { groupId } = req.params;
+
+  // Basic ObjectId validation
+  if (!mongoose.Types.ObjectId.isValid(groupId)) {
+    return res.status(400).json({ message: 'Invalid group ID' });
+  }
+
+  try {
+    const posts = await postService.getPostsByGroup(groupId);
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(`Error fetching posts for group ${groupId}:`, err);
+    res.status(500).json({ message: 'Server error loading group posts' });
+  }
+};
+
 module.exports = {
   createPost,
   getAllPosts,
@@ -118,4 +136,5 @@ module.exports = {
   deletePost,
   getPostsByUser,
   getMonthlyPostStats,
+  getPostsByGroup,
 };

@@ -1,4 +1,3 @@
-
 import {
   loadCurrentUser,
   loadUserProfile,

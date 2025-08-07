@@ -35,5 +35,12 @@ router.get("/users/:userId", isAuthenticated, (req, res) => {
   res.render("userPage", { userId: req.params.userId });
 });
 
+//Render group page
+router.get('/groups/:groupId', isAuthenticated, (req, res) => {
+  res.render('groupPage', {
+    groupId: req.params.groupId,
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
+  });
+});
   
 module.exports = router;
