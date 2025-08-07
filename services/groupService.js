@@ -176,7 +176,10 @@ const deleteGroup = async (id, adminId) => {
     throw err;
   }
 
-  return await Group.findByIdAndDelete(id);
+  // Soft delete:
+  group.isDeleted = true;
+  await group.save();
+  return group;
 };
 
 const getGroupsByUserId = async (userId) => {
