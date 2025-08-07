@@ -114,6 +114,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   };
 
+   // New Group button & modal
+  const newGroupBtn = document.getElementById('newGroupBtn');
+  const newGroupModal = document.getElementById('newGroupModal');
+  const newGroupForm = document.getElementById('newGroupForm');
+  const newGroupError = document.getElementById('newGroupError');
+  const bsNewGroup = new bootstrap.Modal(newGroupModal);
+  if (newGroupBtn) {
+    newGroupBtn.addEventListener('click', () => {
+      newGroupError?.classList.add('d-none');
+      newGroupForm.reset();
+      bsNewGroup.show();
+    });
+    newGroupForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      newGroupError?.classList.add('d-none');
+      const name = document.getElementById('groupName').value.trim();
+      const description = document.getElementById('groupDesc').value.trim();
+      try {
+        const res = await fetch('/api/groups', {
+          method: 'POST', credentials: 'include',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ name, description })
+        });
+        if (!res.ok) {
+          const err = await res.json(); throw new Error(err.message);
+        }
+        const group = await res.json();
+        bsNewGroup.hide();
+        window.location.href = `/groups/${group._id}`;
+      } catch (err) {
+        newGroupError.textContent = err.message;
+        newGroupError.classList.remove('d-none');
+      }
+    });
+  }
+
   // Load posts from server
   const loadPosts = async () => {
     const res = await fetch("/api/feed", { credentials: "include" });

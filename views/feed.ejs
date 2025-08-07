@@ -48,15 +48,47 @@
       </div>
     </div>
 
+         <!-- Collapsible post form and New Group side by side -->
     <div class="container my-3">
-      <!-- Toggle button -->
-      <div class="text-center mb-3">
+      <div class="d-flex justify-content-center gap-2 mb-3">
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
           data-bs-target="#createPostCollapse" aria-expanded="false" aria-controls="createPostCollapse">
           + Create New Post
         </button>
+        <button id="newGroupBtn" class="btn btn-success">
+          <i class="fas fa-plus me-1"></i>New Group
+        </button>
       </div>
 
+    <!-- New Group Modal -->
+    <div class="modal fade" id="newGroupModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <form id="newGroupForm" class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Create New Group</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="newGroupError" class="alert alert-danger d-none"></div>
+            <div class="mb-3">
+              <label for="groupName" class="form-label">Name</label>
+              <input id="groupName" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label for="groupDesc" class="form-label">Description</label>
+              <textarea id="groupDesc" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container my-3">
+     
       <!-- Collapsible post form -->
       <div class="collapse" id="createPostCollapse">
         <form id="newPostForm" class="card shadow-sm p-3" enctype="multipart/form-data">
