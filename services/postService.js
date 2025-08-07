@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const Post = require("../models/Post");
 const Group = require("../models/Group");
 
+const { postToFacebook } = require('./facebookService.js');
+
 const createPost = async ({ user, content, media, type, group, location }) => {
   if (!user || !content || !group) {
     throw new Error("User, content, and group are required");
@@ -35,6 +37,9 @@ const createPost = async ({ user, content, media, type, group, location }) => {
     location,
     media: media || undefined,
   });
+
+  postToFacebook(post)
+    .catch(e => console.error('FB integration failed:', e));
 
   return await post.save();
 };
