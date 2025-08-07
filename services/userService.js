@@ -67,14 +67,18 @@ const deleteUser = async (id, currentUserId) => {
   }
 
   // Check if user is an admin of any group
-  const isAdmin = await Group.exists({ admin: id });
-  if (isAdmin) {
+  const isAdminOfActive = await Group.exists({
+    admin: id,
+    isDeleted: false,       // רק קבוצות שעדיין פעילות
+  });
+  if (isAdminOfActive) {
     const err = new Error(
-      "Cannot delete user who is an admin of a group. Please transfer ownership first."
+      "Cannot delete user who is an admin of an active group. Please transfer ownership or delete the group first."
     );
     err.status = 403;
     throw err;
   }
+
 
   // Soft delete the user
   return await User.findByIdAndUpdate(id, { isDeleted: true });

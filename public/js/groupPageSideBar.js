@@ -173,6 +173,7 @@ async function showManageMembers(groupId) {
   list.className = 'list-group';
 
   // Only non-admin members
+
   const membersToShow = group.members.filter(id => String(id) !== adminId);
 
   membersToShow.forEach(memberObj => {

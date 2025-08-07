@@ -12,9 +12,8 @@ const createGroup = async ({ name, description, admin }) => {
   // 2. Check for duplicate
   const existing = await Group.findOne({ name: trimmedName });
   if (existing) {
-    console.log('samenamegroup')
     const err = new Error('A group with that name already exists');
-    err.status = 400;            // so your error‐handler can send a 400 Bad Request
+    err.status = 400;     // so your error‐handler can send a 400 Bad Request
     throw err;
   }
 
